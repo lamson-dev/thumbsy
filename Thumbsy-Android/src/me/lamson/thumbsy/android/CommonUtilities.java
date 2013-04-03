@@ -27,7 +27,7 @@ public final class CommonUtilities {
     /**
      * Base URL of the Demo Server (such as http://my_host:8080/gcm-demo)
      */
-    static final String SERVER_URL = "http://192.168.2.10:8080";
+    static final String SERVER_URL = "http://thumbsy-demo.appspot.com";
 
     /**
      * Google API project id registered to use GCM.
@@ -37,7 +37,7 @@ public final class CommonUtilities {
     /**
      * Tag used on log messages.
      */
-    static final String TAG = "GCMDemo";
+    static final String TAG = "Thumbsy";
 
     /**
      * Intent used to display a message in the screen.

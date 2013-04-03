@@ -1,13 +1,12 @@
 package me.lamson.thumbsy.android;
 
-import me.lamson.thumbsy.R;
-import me.lamson.thumbsy.R.layout;
-import me.lamson.thumbsy.R.menu;
+import android.content.Intent;
 import android.os.Bundle;
-import android.app.Activity;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 
-public class MainActivity extends Activity {
+public class MainActivity extends RootActivity implements OnClickListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +19,22 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
+	}
+
+	@Override
+	public void onClick(View v) {
+		Intent intent = null;
+		switch (v.getId()) {
+		case R.id.btn_gplus_signout:
+			// if (mPlusClient.isConnected()) {
+			// mPlusClient.clearDefaultAccount();
+			// mPlusClient.disconnect();
+			// mPlusClient.connect();
+			// }
+			break;
+		default:
+			break;
+		}
 	}
 
 }

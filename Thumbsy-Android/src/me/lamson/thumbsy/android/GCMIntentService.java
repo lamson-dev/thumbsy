@@ -17,7 +17,6 @@ package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtilities.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtilities.displayMessage;
-import me.lamson.thumbsy.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -63,7 +62,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onMessage(Context context, Intent intent) {
 		Log.i(TAG, "Received message");
-		String message = getString(R.string.gcm_message);
+//		String message = getString(R.string.gcm_message);
+		String message = (String) intent.getExtras().get("content");
 		displayMessage(context, message);
 		// notifies user
 		generateNotification(context, message);
@@ -103,7 +103,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		Notification notification = new Notification(icon, message, when);
 		String title = context.getString(R.string.app_name);
-		Intent notificationIntent = new Intent(context, DemoActivity.class);
+		Intent notificationIntent = new Intent(context, SetupActivity.class);
 		// set intent so it does not start a new activity
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);

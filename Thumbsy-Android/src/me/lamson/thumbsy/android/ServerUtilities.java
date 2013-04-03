@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import me.lamson.thumbsy.R;
 import android.content.Context;
 import android.util.Log;
 

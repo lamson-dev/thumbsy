@@ -1,50 +1,46 @@
-/*
- * Copyright 2012 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static me.lamson.thumbsy.android.CommonUtilities.EXTRA_MESSAGE;
 import static me.lamson.thumbsy.android.CommonUtilities.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtilities.SERVER_URL;
-import me.lamson.thumbsy.R;
-import android.app.Activity;
+import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.plus.PlusClient;
+import com.google.android.gms.plus.model.people.Person;
 
 /**
- * Main UI for the demo app.
+ * Example of signing in a user with Google+, and how to make a call to a
+ * Google+ API endpoint.
  */
-public class DemoActivity extends Activity {
+public class SetupActivity extends FragmentActivity implements
+		View.OnClickListener, OnSignedInListener {
 
-	TextView mDisplay;
+	public static final int REQUEST_CODE_PLUS_CLIENT_FRAGMENT = 0;
+
+	private TextView mSignInStatus, mServerMessage, mDisplay;
+	private EditText mClientMessage;
+	private PlusClientFragment mSignInFragment;
 	AsyncTask<Void, Void, Void> mRegisterTask;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		checkNotNull(SERVER_URL, "SERVER_URL");
 		checkNotNull(SENDER_ID, "SENDER_ID");
 
@@ -55,14 +51,29 @@ public class DemoActivity extends Activity {
 		// while developing the app, then uncomment it when it's ready.
 		GCMRegistrar.checkManifest(this);
 
-		setContentView(R.layout.main);
+		setContentView(R.layout.activity_setup);
+		// setContentView(R.layout.main);
 
-		mDisplay = (TextView) findViewById(R.id.display);
+		mSignInFragment = PlusClientFragment.getPlusClientFragment(this,
+				MomentUtil.VISIBLE_ACTIVITIES);
+
+		findViewById(R.id.btn_gplus_signin).setOnClickListener(this);
+		findViewById(R.id.btn_gplus_signout).setOnClickListener(this);
+		findViewById(R.id.btn_gplus_revoke).setOnClickListener(this);
+		findViewById(R.id.btn_send).setOnClickListener(this);
+		mSignInStatus = (TextView) findViewById(R.id.tv_signin_status);
+		mClientMessage = (EditText) findViewById(R.id.et_client_message);
+		mServerMessage = (TextView) findViewById(R.id.tv_server_message);
+
+		mDisplay = (TextView) findViewById(R.id.tv_display);
+
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
 
-		final String regId = GCMRegistrar.getRegistrationId(this);
+	}
 
+	private void registerDevice() {
+		final String regId = GCMRegistrar.getRegistrationId(this);
 		if (regId.equals("")) {
 
 			// Automatically registers application on startup.
@@ -106,6 +117,55 @@ public class DemoActivity extends Activity {
 				mRegisterTask.execute(null, null, null);
 			}
 		}
+	}
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+		case R.id.btn_gplus_signout:
+			resetAccountState();
+			mSignInFragment.signOut();
+			break;
+		case R.id.btn_gplus_signin:
+			mSignInFragment.signIn(REQUEST_CODE_PLUS_CLIENT_FRAGMENT);
+			break;
+		case R.id.btn_gplus_revoke:
+			resetAccountState();
+			mSignInFragment.revokeAccessAndDisconnect();
+			break;
+		case R.id.btn_send:
+			break;
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int responseCode,
+			Intent intent) {
+		mSignInFragment.handleOnActivityResult(requestCode, responseCode,
+				intent);
+	}
+
+	@Override
+	public void onSignedIn(PlusClient plusClient) {
+
+		// register device on signed in
+		registerDevice();
+
+		mSignInStatus.setText(getString(R.string.signed_in_status));
+
+		// We can now obtain the signed-in user's profile information.
+		Person currentPerson = plusClient.getCurrentPerson();
+		if (currentPerson != null) {
+			String greeting = getString(R.string.greeting_status,
+					currentPerson.getDisplayName());
+			mSignInStatus.setText(greeting);
+		} else {
+			resetAccountState();
+		}
+	}
+
+	private void resetAccountState() {
+		mSignInStatus.setText(getString(R.string.signed_out_status));
 	}
 
 	@Override
@@ -164,5 +224,4 @@ public class DemoActivity extends Activity {
 			mDisplay.append(newMessage + "\n");
 		}
 	};
-
 }
