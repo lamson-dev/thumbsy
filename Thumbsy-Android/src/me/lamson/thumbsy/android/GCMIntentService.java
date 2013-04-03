@@ -62,7 +62,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onMessage(Context context, Intent intent) {
 		Log.i(TAG, "Received message");
-//		String message = getString(R.string.gcm_message);
+		// String message = getString(R.string.gcm_message);
 		String message = (String) intent.getExtras().get("content");
 		displayMessage(context, message);
 		// notifies user

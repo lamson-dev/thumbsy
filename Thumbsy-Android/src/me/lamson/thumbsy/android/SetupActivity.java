@@ -1,10 +1,5 @@
 package me.lamson.thumbsy.android;
 
-import static me.lamson.thumbsy.android.CommonUtilities.DISPLAY_MESSAGE_ACTION;
-import static me.lamson.thumbsy.android.CommonUtilities.EXTRA_MESSAGE;
-import static me.lamson.thumbsy.android.CommonUtilities.SENDER_ID;
-import static me.lamson.thumbsy.android.CommonUtilities.SERVER_URL;
-import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,10 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
+import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
+
+import static me.lamson.thumbsy.android.CommonUtilities.*;
 
 /**
  * Example of signing in a user with Google+, and how to make a call to a
@@ -32,7 +29,7 @@ public class SetupActivity extends FragmentActivity implements
 
 	public static final int REQUEST_CODE_PLUS_CLIENT_FRAGMENT = 0;
 
-	private TextView mSignInStatus, mServerMessage, mDisplay;
+	private TextView mSignInStatus, mServerMessage, mDeviceRegister, mDisplay;
 	private EditText mClientMessage;
 	private PlusClientFragment mSignInFragment;
 	AsyncTask<Void, Void, Void> mRegisterTask;
@@ -62,6 +59,7 @@ public class SetupActivity extends FragmentActivity implements
 		findViewById(R.id.btn_gplus_revoke).setOnClickListener(this);
 		findViewById(R.id.btn_send).setOnClickListener(this);
 		mSignInStatus = (TextView) findViewById(R.id.tv_signin_status);
+		mDeviceRegister = (TextView) findViewById(R.id.tv_device_register);
 		mClientMessage = (EditText) findViewById(R.id.et_client_message);
 		mServerMessage = (TextView) findViewById(R.id.tv_server_message);
 
@@ -78,13 +76,12 @@ public class SetupActivity extends FragmentActivity implements
 
 			// Automatically registers application on startup.
 			GCMRegistrar.register(this, SENDER_ID);
-
 		} else {
 
 			// Device is already registered on GCM, check server.
 			if (GCMRegistrar.isRegisteredOnServer(this)) {
 				// Skips registration.
-				mDisplay.append(getString(R.string.already_registered) + "\n");
+				mDeviceRegister.setText(getString(R.string.already_registered));
 			} else {
 				// Try to register again, but not in the UI thread.
 				// It's also necessary to cancel the thread onDestroy(),
@@ -132,6 +129,9 @@ public class SetupActivity extends FragmentActivity implements
 		case R.id.btn_gplus_revoke:
 			resetAccountState();
 			mSignInFragment.revokeAccessAndDisconnect();
+
+			// unregister device on revoke
+			GCMRegistrar.unregister(this);
 			break;
 		case R.id.btn_send:
 			break;
