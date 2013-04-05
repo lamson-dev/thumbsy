@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-	
-  
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
   <listener>
     <listener-class>
       me.lamson.thumbsy.appengine.ApiKeyInitializer
@@ -57,6 +57,19 @@
   <servlet-mapping>
     <servlet-name>SendMessageServlet</servlet-name>
     <url-pattern>/send</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>ReceiveMessageServlet</servlet-name>
+    <servlet-class>
+      me.lamson.thumbsy.appengine.ReceiveMessageServlet
+    </servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>ReceiveMessageServlet</servlet-name>
+    <url-pattern>/receive</url-pattern>
   </servlet-mapping>
 
   <servlet>

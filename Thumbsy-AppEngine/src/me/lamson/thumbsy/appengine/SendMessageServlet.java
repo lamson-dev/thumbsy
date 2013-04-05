@@ -45,6 +45,7 @@ public class SendMessageServlet extends BaseServlet {
 
 	static final String PARAMETER_DEVICE = "device";
 	static final String PARAMETER_MULTICAST = "multicastKey";
+	static final String PARAMETER_MESSAGE = "message";
 
 	private Sender sender;
 
@@ -98,7 +99,7 @@ public class SendMessageServlet extends BaseServlet {
 		}
 		String regId = req.getParameter(PARAMETER_DEVICE);
 		if (regId != null) {
-			String message = req.getParameter("new-message");
+			String message = req.getParameter(PARAMETER_MESSAGE);
 			sendSingleMessage(regId, resp, message);
 			return;
 		}
