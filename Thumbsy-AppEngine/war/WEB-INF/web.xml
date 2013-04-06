@@ -98,10 +98,45 @@
     <url-pattern>/register</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>MessageServlet</servlet-name>
+    <servlet-class>
+      me.lamson.thumbsy.appengine.MessageServlet
+    </servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MessageServlet</servlet-name>
+    <url-pattern>/message</url-pattern>
+  </servlet-mapping>
   
-	<welcome-file-list>
-		<welcome-file>home.jsp</welcome-file>
-	</welcome-file-list>
+  <servlet>
+    <servlet-name>ConversationServlet</servlet-name>
+    <servlet-class>
+      me.lamson.thumbsy.appengine.ConversationServlet
+    </servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ConversationServlet</servlet-name>
+    <url-pattern>/conversation</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>TestServlet</servlet-name>
+    <servlet-class>
+      me.lamson.thumbsy.appengine.TestServlet
+    </servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>TestServlet</servlet-name>
+    <url-pattern>/test</url-pattern>
+  </servlet-mapping>
+  
+  <welcome-file-list>
+	<welcome-file>home.jsp</welcome-file>
+  </welcome-file-list>
 	
  <servlet>
   <servlet-name>SystemServiceServlet</servlet-name>

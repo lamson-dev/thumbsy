@@ -45,7 +45,7 @@ public class SendMessageServlet extends BaseServlet {
 
 	static final String PARAMETER_DEVICE = "device";
 	static final String PARAMETER_MULTICAST = "multicastKey";
-	static final String PARAMETER_MESSAGE = "message";
+	static final String PARAMETER_MESSAGE = "new-message";
 
 	private Sender sender;
 

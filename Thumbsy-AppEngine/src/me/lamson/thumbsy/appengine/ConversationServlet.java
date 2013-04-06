@@ -26,10 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import me.lamson.thumbsy.models.BaseServlet;
 import me.lamson.thumbsy.models.Conversation;
-import me.lamson.thumbsy.models.ConversationDao;
-import me.lamson.thumbsy.models.Util;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;

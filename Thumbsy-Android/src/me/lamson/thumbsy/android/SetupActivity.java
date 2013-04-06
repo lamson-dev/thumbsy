@@ -1,5 +1,22 @@
 package me.lamson.thumbsy.android;
 
+import static me.lamson.thumbsy.android.CommonUtilities.DISPLAY_MESSAGE_ACTION;
+import static me.lamson.thumbsy.android.CommonUtilities.EXTRA_MESSAGE;
+import static me.lamson.thumbsy.android.CommonUtilities.SENDER_ID;
+import static me.lamson.thumbsy.android.CommonUtilities.SERVER_URL;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+
+import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
+import me.lamson.thumbsy.models.Message;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,18 +24,18 @@ import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.plus.PlusClient;
 import com.google.android.gms.plus.model.people.Person;
-import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
-
-import static me.lamson.thumbsy.android.CommonUtilities.*;
+import com.google.gson.Gson;
 
 /**
  * Example of signing in a user with Google+, and how to make a call to a
@@ -27,12 +44,14 @@ import static me.lamson.thumbsy.android.CommonUtilities.*;
 public class SetupActivity extends FragmentActivity implements
 		View.OnClickListener, OnSignedInListener {
 
+	private static final String TAG = "SetupActivity";
+
 	public static final int REQUEST_CODE_PLUS_CLIENT_FRAGMENT = 0;
 
 	private TextView mSignInStatus, mServerMessage, mDeviceRegister, mDisplay;
 	private EditText mClientMessage;
 	private PlusClientFragment mSignInFragment;
-	AsyncTask<Void, Void, Void> mRegisterTask;
+	AsyncTask<Void, Void, Void> mRegisterTask, mSendMessageTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -134,8 +153,60 @@ public class SetupActivity extends FragmentActivity implements
 			GCMRegistrar.unregister(this);
 			break;
 		case R.id.btn_send:
+			final String messageData = createMessage(mClientMessage.getText()
+					.toString());
+			mSendMessageTask = new AsyncTask<Void, Void, Void>() {
+
+				@Override
+				protected Void doInBackground(Void... params) {
+					HttpClient client = new DefaultHttpClient();
+					HttpConnectionParams.setConnectionTimeout(
+							client.getParams(), 10000); // Timeout Limit
+					HttpResponse response;
+
+					try {
+						HttpPost post = new HttpPost(
+								"http://thumbsy-demo.appspot.com/test");
+						StringEntity se = new StringEntity(messageData);
+						se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+								"application/json"));
+						post.setEntity(se);
+						response = client.execute(post);
+
+						// HttpPost request = new HttpPost(serverUrl);
+						// request.setEntity(new ByteArrayEntity(
+						// postMessage.toString().getBytes("UTF8")));
+						// HttpResponse response = client.execute(request);
+
+						/* Checking response */
+						if (response != null) {
+							Log.d(TAG,
+									EntityUtils.toString(response.getEntity()));
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						Log.e(TAG, "Cannot Estabilish Connection");
+					}
+
+					return null;
+				}
+
+				@Override
+				protected void onPostExecute(Void result) {
+					mSendMessageTask = null;
+				}
+
+			};
+			mSendMessageTask.execute(null, null, null);
 			break;
 		}
+	}
+
+	private String createMessage(String message) {
+
+		Message m = new Message(null, null, message, false);
+		return new Gson().toJson(m);
 	}
 
 	@Override
