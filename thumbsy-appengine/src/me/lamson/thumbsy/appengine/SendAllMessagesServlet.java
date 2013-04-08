@@ -49,7 +49,8 @@ public class SendAllMessagesServlet extends BaseServlet {
 		if (devices.isEmpty()) {
 			status = "Message ignored as there is no device registered!";
 		} else {
-			String messageContent = req.getParameter(SendMessageServlet.PARAMETER_MESSAGE);
+			String messageContent = req
+					.getParameter(SendMessageServlet.PARAMETER_MESSAGE);
 
 			Queue queue = QueueFactory.getQueue("gcm");
 			// NOTE: check below is for demonstration purposes; a real
@@ -60,7 +61,7 @@ public class SendAllMessagesServlet extends BaseServlet {
 				String device = devices.get(0);
 				queue.add(withUrl("/send").param(
 						SendMessageServlet.PARAMETER_DEVICE, device).param(
-								SendMessageServlet.PARAMETER_MESSAGE, messageContent));
+						SendMessageServlet.PARAMETER_MESSAGE, messageContent));
 				status = "Single message queued for registration id: \n"
 						+ device + "\nMessage Content: " + messageContent;
 			} else {
@@ -93,8 +94,8 @@ public class SendAllMessagesServlet extends BaseServlet {
 						+ " multicast messages to " + total + " devices";
 			}
 		}
-		req.setAttribute(HomeServlet.ATTRIBUTE_STATUS, status.toString());
-		getServletContext().getRequestDispatcher("/home").forward(req, resp);
+		// req.setAttribute(HomeServlet.ATTRIBUTE_STATUS, status.toString());
+		// getServletContext().getRequestDispatcher("/home").forward(req, resp);
 	}
 
 }

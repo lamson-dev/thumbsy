@@ -19,7 +19,6 @@
      NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
            where PACKAGE is the application's package name.
     -->
-
     <permission
         android:name="me.lamson.thumbsy.android.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />

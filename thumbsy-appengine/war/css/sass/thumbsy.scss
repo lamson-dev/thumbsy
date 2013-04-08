@@ -1,82 +1,68 @@
+$msgbox-color: #dceaf4;
+
 @mixin rounded($radius: 4px) {
-	-webkit-border-radius: $radius;
-	-moz-border-radius: $radius;
-	-ms-border-radius: $radius;
-	-o-border-radius: $radius;
-	border-radius: $radius;
-	border: 1px solid rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  -ms-border-radius: $radius;
+  -o-border-radius: $radius;
+  border-radius: $radius;
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 @mixin shadowed() {
-	-webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
-	-moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
-	box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
 }
 
 @mixin transition() {
-	-webkit-transition: all 0.2s ease-out;
-	-moz-transition: all 0.2s ease-out;
-	-ms-transition: all 0.2s ease-out;
-	-o-transition: all 0.2s ease-out;
-	transition: all 0.2s ease-out;
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  -ms-transition: all 0.2s ease-out;
+  -o-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
 }
 
-#page { 
-  	margin: 20px auto;
-  	width: 1000px;
+html, body {
+  min-height: 100%;
 }
 
-.container {
-	width: 940px;
-/* 	border: 1px dashed #fff; */
-	padding: 10px 9px; 
-}
-.wrapper {
-	padding: 30px;
-	padding-top: 10px;
-/* 	margin: 20px auto 20px auto; */
-/* 	border: 2px solid $black; */
-} 
+#main-content {
 
-#main {
-	text-align: center;
-	
 }
 
-#message-box {	
-	@include rounded();
-	height: 300px;
-	background-color: #d6e5cd;
-	
-	p {
-		margin: auto;
-		padding: 10px;
-	}
-	
-	.sender {
-		text-align: right;
-		background-color: #52b9d2;
-	}
-	
-	.receiver {
-		text-align: left;
-		background-color: #f4c68b;
-	}	
+#sidebar {
+  //position: absolute;
+  background-color: lightslategray;
+  height: 600px;
 }
 
-#user-input {
-	@include rounded();
-	background-color: #695494;
-	vertical-align: middle;
-	padding: 10px;
+.message-box {
+  @include shadowed;
+  background-color: $msgbox-color;
+  margin-top: 20px;
+  height: 400px;
+  p {
+    @include rounded;
+    padding: 5px;
+
+    margin-top: 1px;
+    margin-bottom: 1px;
+  }
 }
-/*
-.message {
-	@include shadowed();
-	@include rounded(4px);
-	@include transition();
+
+.incoming-true {
+  background-color: peachpuff;
 }
-*/
 
+.incoming-false {
+  background-color: snow;
+  text-align: right;
+}
 
-
+p {
+  color: #777777;
+  font-family: "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
