@@ -19,15 +19,15 @@ import com.google.appengine.api.datastore.Query;
 public class MessageDao {
 
 	/**
-	 * Create or update Item for a particular product. Product entity has one to
+	 * Create or update Item for a particular conversation. Product entity has one to
 	 * many relation-ship with Item entity
 	 * 
 	 * @param conversationId
-	 *            : product name for which the item is created.
-	 * @param itemName
-	 *            : item name
+	 *            : conversation name for which the message is created.
+	 * @param messageName
+	 *            : message name
 	 * @param price
-	 *            : price of the item
+	 *            : price of the message
 	 * @return
 	 */
 	public static Entity createOrUpdateMessage(Message msg) {
@@ -48,62 +48,62 @@ public class MessageDao {
 			// message.setProperty("price", price);
 			// }
 		}
-		Util.persistEntity(message);
+		DatastoreUtils.persistEntity(message);
 		return message;
 	}
 
 	/**
-	 * get All the items in the list
+	 * get All the messages in the list
 	 * 
 	 * @param kind
-	 *            : item kind
-	 * @return all the items
+	 *            : message kind
+	 * @return all the messages
 	 */
 	public static Iterable<Entity> getAllMessages() {
-		Iterable<Entity> entities = Util.listEntities("Item", null, null);
+		Iterable<Entity> entities = DatastoreUtils.listEntities("Item", null, null);
 		return entities;
 	}
 
 	/**
-	 * Get the item by name, return an Iterable
+	 * Get the message by name, return an Iterable
 	 * 
-	 * @param itemName
-	 *            : item name
+	 * @param messageId
+	 *            : message name
 	 * @return Item Entity
 	 */
-	public static Iterable<Entity> getMessage(String itemName) {
-		Iterable<Entity> entities = Util.listEntities("Item", "name", itemName);
+	public static Iterable<Entity> getMessage(Long messageId) {
+		Iterable<Entity> entities = DatastoreUtils.listEntities("Item", "name", messageId);
 		return entities;
 	}
 
 	/**
-	 * Get all the items for a product
+	 * Get all the messages for a conversation
 	 * 
 	 * @param kind
-	 *            : item kind
-	 * @param productName
-	 *            : product name
-	 * @return: all items of type product
+	 *            : message kind
+	 * @param conversationId
+	 *            : conversation name
+	 * @return: all messages of type conversation
 	 */
 	public static Iterable<Entity> getMessagesForConversation(String kind,
-			String productName) {
-		Key ancestorKey = KeyFactory.createKey("Product", productName);
-		return Util.listChildren("Item", ancestorKey);
+			Long conversationId) {
+		Key ancestorKey = KeyFactory.createKey("Conversation", conversationId);
+		return DatastoreUtils.listChildren("Message", ancestorKey);
 	}
 
 	/**
-	 * get Item with item name
+	 * get Item with message name
 	 * 
-	 * @param itemName
-	 *            : get itemName
-	 * @return item entity
+	 * @param messageName
+	 *            : get messageName
+	 * @return message entity
 	 */
 	public static Entity getSingleMessage(Long id) {
 		Query query = new Query(Message.ENTITY_NAME);
 		query.setFilter(new Query.FilterPredicate(Message.PROPERTY_ID,
 				Query.FilterOperator.EQUAL, id));
 		// query.addFilter(Message.PROPERTY_ID, Query.FilterOperator.EQUAL, id);
-		List<Entity> results = Util.getDatastoreServiceInstance()
+		List<Entity> results = DatastoreUtils.getDatastoreServiceInstance()
 				.prepare(query).asList(FetchOptions.Builder.withDefaults());
 		if (!results.isEmpty()) {
 			return (Entity) results.remove(0);
@@ -114,7 +114,7 @@ public class MessageDao {
 	public static String deleteMessage(Long id) {
 		Entity entity = getSingleMessage(id);
 		if (entity != null) {
-			Util.deleteEntity(entity.getKey());
+			DatastoreUtils.deleteEntity(entity.getKey());
 			return ("Item deleted successfully.");
 		} else
 			return ("Item not found");

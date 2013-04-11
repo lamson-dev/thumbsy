@@ -17,18 +17,23 @@ package me.lamson.thumbsy.appengine;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import me.lamson.thumbsy.models.Message;
+
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.google.gson.Gson;
 
 /**
  * Servlet that adds a new message to all registered devices.
@@ -49,9 +54,13 @@ public class SendAllMessagesServlet extends BaseServlet {
 		if (devices.isEmpty()) {
 			status = "Message ignored as there is no device registered!";
 		} else {
-			String messageContent = req
-					.getParameter(SendMessageServlet.PARAMETER_MESSAGE);
 
+			String jsonData = readJsonRequest(req);
+			Message msg = GSON.fromJson(jsonData, Message.class);
+
+			String messageContent = msg.getContent();
+			// String messageContent = req
+			// .getParameter(SendMessageServlet.PARAMETER_MESSAGE);
 			Queue queue = QueueFactory.getQueue("gcm");
 			// NOTE: check below is for demonstration purposes; a real
 			// application

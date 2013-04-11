@@ -32,15 +32,13 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.gson.Gson;
 
 /**
- * This servlet responds to the request corresponding to product entities. The
- * servlet manages the Product Entity
+ * This servlet responds to the request corresponding to conversation entities.
+ * The servlet manages the Product Entity
  * 
  * 
  */
 @SuppressWarnings("serial")
 public class ConversationServlet extends BaseServlet {
-
-	static final String PARAMETER_JSON_DATA = "jsonData";
 
 	private static final Logger logger = Logger
 			.getLogger(ConversationServlet.class.getCanonicalName());
@@ -52,21 +50,23 @@ public class ConversationServlet extends BaseServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		super.doGet(req, resp);
-		logger.log(Level.INFO, "Obtaining product listing");
-		String searchFor = req.getParameter("q");
+		logger.log(Level.INFO, "Obtaining conversation listing");
+		
+		String searchFor = req.getParameter("id");
+		
 		PrintWriter out = resp.getWriter();
 		Iterable<Entity> entities = null;
 		if (searchFor == null || searchFor.equals("") || searchFor == "*") {
 			entities = ConversationDao
 					.getAllConversations(Conversation.ENTITY_NAME);
-			out.println(Util.writeJSON(entities));
+			out.println(DatastoreUtils.writeJSON(entities));
 		} else {
 			Entity conversation = ConversationDao.getConversation(Long
 					.parseLong(searchFor));
 			if (conversation != null) {
 				Set<Entity> result = new HashSet<Entity>();
 				result.add(conversation);
-				out.println(Util.writeJSON(result));
+				out.println(DatastoreUtils.writeJSON(result));
 			}
 		}
 	}
@@ -76,33 +76,34 @@ public class ConversationServlet extends BaseServlet {
 	 */
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		logger.log(Level.INFO, "Creating Product");
+		logger.log(Level.INFO, "Creating conversation");
 		PrintWriter out = resp.getWriter();
 
-		String jsonData = req.getParameter(PARAMETER_JSON_DATA);
+		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
+		String jsonData = readJsonRequest(req);
 		try {
-			Conversation conversation = new Gson().fromJson(jsonData,
+			Conversation conversation = GSON.fromJson(jsonData,
 					Conversation.class);
 
 			ConversationDao.createOrUpdateConversation(conversation);
 		} catch (Exception e) {
-			String msg = Util.getErrorMessage(e);
+			String msg = DatastoreUtils.getErrorMessage(e);
 			out.print(msg);
 		}
 	}
 
 	/**
-	 * Delete the product entity
+	 * Delete the conversation entity
 	 */
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String productkey = req.getParameter("id");
+		String conversationkey = req.getParameter("id");
 		PrintWriter out = resp.getWriter();
 		try {
 			out.println(ConversationDao.deleteConversation(Long
-					.parseLong(productkey)));
+					.parseLong(conversationkey)));
 		} catch (Exception e) {
-			out.println(Util.getErrorMessage(e));
+			out.println(DatastoreUtils.getErrorMessage(e));
 		}
 	}
 
@@ -111,14 +112,17 @@ public class ConversationServlet extends BaseServlet {
 	 */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String action = req.getParameter("action");
-		if (action.equalsIgnoreCase("delete")) {
-			doDelete(req, resp);
-			return;
-		} else if (action.equalsIgnoreCase("put")) {
-			doPut(req, resp);
-			return;
-		}
+		// String action = req.getParameter("action");
+		// if (action.equalsIgnoreCase("delete")) {
+		// doDelete(req, resp);
+		// return;
+		// } else if (action.equalsIgnoreCase("put")) {
+		// doPut(req, resp);
+		// return;
+		// }
+		
+		doPut(req,resp);
+		return;
 	}
 
 }

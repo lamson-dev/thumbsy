@@ -5,14 +5,13 @@ html, body {
   background-color: lightslategray;
   height: 600px; }
 
-.message-box {
+.conversation-box {
   -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   background-color: #dceaf4;
-  margin-top: 20px;
-  height: 400px; }
-  .message-box p {
+  margin-top: 20px; }
+  .conversation-box p {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     -ms-border-radius: 4px;
@@ -22,6 +21,10 @@ html, body {
     padding: 5px;
     margin-top: 1px;
     margin-bottom: 1px; }
+
+.messages-box {
+  overflow: auto;
+  height: 400px; }
 
 .incoming-true {
   background-color: peachpuff; }

@@ -15,8 +15,8 @@
  */
 package me.lamson.thumbsy.android;
 
-import static me.lamson.thumbsy.android.CommonUtilities.SENDER_ID;
-import static me.lamson.thumbsy.android.CommonUtilities.displayMessage;
+import static me.lamson.thumbsy.android.CommonUtils.displayMessage;
+import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -43,7 +43,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 	protected void onRegistered(Context context, String registrationId) {
 		Log.i(TAG, "Device registered: regId = " + registrationId);
 		displayMessage(context, getString(R.string.gcm_registered));
-		ServerUtilities.register(context, registrationId);
+		ServerUtils.register(context, registrationId, ThumbsyApp.getUser()
+				.getId());
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		Log.i(TAG, "Device unregistered");
 		displayMessage(context, getString(R.string.gcm_unregistered));
 		if (GCMRegistrar.isRegisteredOnServer(context)) {
-			ServerUtilities.unregister(context, registrationId);
+			ServerUtils.unregister(context, registrationId);
 		} else {
 			// This callback results from the call to unregister made on
 			// ServerUtilities when the registration to the server failed.

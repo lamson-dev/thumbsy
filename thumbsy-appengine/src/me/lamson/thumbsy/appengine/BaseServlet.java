@@ -15,7 +15,9 @@
  */
 package me.lamson.thumbsy.appengine;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 
@@ -23,6 +25,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import me.lamson.thumbsy.models.Message;
+
+import com.google.gson.Gson;
 
 /**
  * Skeleton class for all servlets in this package.
@@ -34,6 +40,10 @@ abstract class BaseServlet extends HttpServlet {
 	static final boolean DEBUG = true;
 
 	protected final Logger logger = Logger.getLogger(getClass().getName());
+	protected final Gson GSON = new Gson();
+
+	protected BufferedReader reader = null;
+	protected StringBuffer buffer = null;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -91,4 +101,20 @@ abstract class BaseServlet extends HttpServlet {
 		return value == null || value.trim().length() == 0;
 	}
 
+	protected String readJsonRequest(HttpServletRequest request)
+			throws IOException {
+		try {
+			reader = new BufferedReader(new InputStreamReader(
+					request.getInputStream()));
+			buffer = new StringBuffer();
+			int read;
+			char[] chars = new char[1024];
+			while ((read = reader.read(chars)) != -1)
+				buffer.append(chars, 0, read);
+		} finally {
+			if (reader != null)
+				reader.close();
+		}
+		return buffer.toString();
+	}
 }

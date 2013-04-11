@@ -15,9 +15,9 @@
  */
 package me.lamson.thumbsy.android;
 
-import static me.lamson.thumbsy.android.CommonUtilities.SERVER_URL;
-import static me.lamson.thumbsy.android.CommonUtilities.TAG;
-import static me.lamson.thumbsy.android.CommonUtilities.displayMessage;
+import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
+import static me.lamson.thumbsy.android.CommonUtils.TAG;
+import static me.lamson.thumbsy.android.CommonUtils.displayMessage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import me.lamson.thumbsy.android.R;
+import me.lamson.thumbsy.android.R.string;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -38,7 +41,7 @@ import com.google.android.gcm.GCMRegistrar;
 /**
  * Helper class used to communicate with the demo server.
  */
-public final class ServerUtilities {
+public final class ServerUtils {
 
 	private static final int MAX_ATTEMPTS = 5;
 	private static final int BACKOFF_MILLI_SECONDS = 2000;
@@ -49,11 +52,15 @@ public final class ServerUtilities {
 	 * 
 	 * @return whether the registration succeeded or not.
 	 */
-	static boolean register(final Context context, final String regId) {
+	static boolean register(final Context context, final String regId,
+			final String userId) {
 		Log.i(TAG, "registering device (regId = " + regId + ")");
 		String serverUrl = SERVER_URL + "/register";
 		Map<String, String> params = new HashMap<String, String>();
+
 		params.put("regId", regId);
+		params.put("userId", userId);
+
 		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
 		// Once GCM returns a registration id, we need to register it in the
 		// demo server. As the server might be down, we will retry it a couple
@@ -66,7 +73,7 @@ public final class ServerUtilities {
 				post(serverUrl, params);
 				GCMRegistrar.setRegisteredOnServer(context, true);
 				String message = context.getString(R.string.server_registered);
-				CommonUtilities.displayMessage(context, message);
+				CommonUtils.displayMessage(context, message);
 				return true;
 			} catch (IOException e) {
 				// Here we are simplifying and retrying on any error; in a real
@@ -91,7 +98,7 @@ public final class ServerUtilities {
 		}
 		String message = context.getString(R.string.server_register_error,
 				MAX_ATTEMPTS);
-		CommonUtilities.displayMessage(context, message);
+		CommonUtils.displayMessage(context, message);
 		return false;
 	}
 
@@ -107,7 +114,7 @@ public final class ServerUtilities {
 			post(serverUrl, params);
 			GCMRegistrar.setRegisteredOnServer(context, false);
 			String message = context.getString(R.string.server_unregistered);
-			CommonUtilities.displayMessage(context, message);
+			CommonUtils.displayMessage(context, message);
 		} catch (IOException e) {
 			// At this point the device is unregistered from GCM, but still
 			// registered in the server.
@@ -116,7 +123,7 @@ public final class ServerUtilities {
 			// a "NotRegistered" error message and should unregister the device.
 			String message = context.getString(
 					R.string.server_unregister_error, e.getMessage());
-			CommonUtilities.displayMessage(context, message);
+			CommonUtils.displayMessage(context, message);
 		}
 	}
 

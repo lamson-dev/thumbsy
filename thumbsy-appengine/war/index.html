@@ -18,8 +18,10 @@
 
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="css/bootstrap-responsive.min.css"/>-->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/sass/thumbsy.css">
+
     <script src="js/vendor/modernizr-2.6.2.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
 
@@ -32,7 +34,7 @@
 <![endif]-->
 
 <!-- Add your site or application content here -->
-<div class="navbar navbar-inverse navbar-static-top">
+<div class="navbar">
     <div class="navbar-inner fill">
         <a class="brand" href="#">Thumbsy</a>
         <ul class="nav">
@@ -46,8 +48,9 @@
     </div>
 </div>
 
-<div class="container-fluid">
-    <div class="row-fluid">
+
+<div class="container">
+    <div class="row">
 
         <!--sidebar content-->
         <div id="sidebar" class="span3">
@@ -57,24 +60,25 @@
         <!--main content-->
         <div id="main-content" class="span9">
 
-            <div class="message-box span5" ng-controller="MessageCtrl">
+            <div class="conversation-box span5" ng-controller="ConversationCtrl">
+                <button class="btn" ng-click="fetchConversation()">Fetch Conversation</button>
                 <p>Number of Messages: {{getTotalMessages()}}</p>
-                <button ng-click="fetchMessages()">Fetch Messages</button>
 
-                <form class="form-horizontal" action="http://thumbsy-demo.appspot.com/sendAll" method="post">
-
-                    <input type="text" name="new-message" ng-model="messageContent"/>
-                    <button class="btn" ng-click="addMessage(messageContent)">Send <i class="icon-ok-sign"></i></button>
-
-                    <div ng-repeat="message in messages" ng-model="message.incoming">
-                        <p class="incoming-{{message.incoming}}">{{message.text}}
-                        </p>
-                        <button class="incoming-{{message.incoming}}" ng-click="deleteMessage($index)"><i
-                                class="icon-trash"></i></button>
-                    </div>
-
-
+                <form class="form-inline">
+                    <input type="text" class="input-small" name="new-message" ng-model="messageContent"/>
+                    <button class="btn" ng-click="addMessage(messageContent)">Send <i
+                            class="icon-ok-sign"></i></button>
                 </form>
+                <div class="messages-box">
+                    <div ng-repeat="message in messages" ng-model="message.incoming">
+                        <p class="incoming-{{message.incoming}}">{{message.content}}
+                            <button class="btn btn-small incoming-{{message.incoming}}"
+                                    ng-click="deleteMessage($index)"><i
+                                    class="icon-trash"></i></button>
+                        </p>
+
+                    </div>
+                </div>
             </div>
 
         </div>

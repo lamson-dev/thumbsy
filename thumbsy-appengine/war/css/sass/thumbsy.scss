@@ -37,11 +37,12 @@ html, body {
   height: 600px;
 }
 
-.message-box {
+.conversation-box {
   @include shadowed;
   background-color: $msgbox-color;
   margin-top: 20px;
-  height: 400px;
+
+
   p {
     @include rounded;
     padding: 5px;
@@ -49,6 +50,11 @@ html, body {
     margin-top: 1px;
     margin-bottom: 1px;
   }
+}
+
+.messages-box {
+  overflow: auto;
+  height: 400px;
 }
 
 .incoming-true {

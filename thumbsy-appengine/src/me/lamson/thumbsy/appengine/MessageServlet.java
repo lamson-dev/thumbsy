@@ -22,10 +22,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.models.Conversation;
 import me.lamson.thumbsy.models.Message;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.gson.Gson;
 
 /**
  * This servlet responds to the request corresponding to items. The class
@@ -49,20 +49,29 @@ public class MessageServlet extends BaseServlet {
 			throws ServletException, IOException {
 
 		super.doGet(req, resp);
-		logger.log(Level.INFO, "Obtaining Item listing");
-		String searchBy = req.getParameter("item-searchby");
-		String searchFor = req.getParameter("q");
+		logger.log(Level.INFO, "Obtaining Message listing");
+
+		String searchBy = req.getParameter("message-searchby");
+		String searchFor = req.getParameter("conversationId");
+
 		PrintWriter out = resp.getWriter();
 		if (searchFor == null || searchFor.equals("")) {
+
 			Iterable<Entity> entities = MessageDao.getAllMessages();
-			out.println(Util.writeJSON(entities));
-		} else if (searchBy == null || searchBy.equals("name")) {
-			Iterable<Entity> entities = MessageDao.getMessage(searchFor);
-			out.println(Util.writeJSON(entities));
-		} else if (searchBy != null && searchBy.equals("product")) {
+			out.println(DatastoreUtils.writeJSON(entities));
+
+		} else if (searchBy == null || searchBy.equals("messageId")) {
+
+			Iterable<Entity> entities = MessageDao.getMessage(Long
+					.valueOf(searchFor));
+			out.println(DatastoreUtils.writeJSON(entities));
+
+		} else if (searchBy != null && searchBy.equals("conversationId")) {
+
 			Iterable<Entity> entities = MessageDao.getMessagesForConversation(
-					"Item", searchFor);
-			out.println(Util.writeJSON(entities));
+					"Message", Long.valueOf(searchFor));
+
+			out.println(DatastoreUtils.writeJSON(entities));
 		}
 	}
 
@@ -71,10 +80,20 @@ public class MessageServlet extends BaseServlet {
 	 */
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		logger.log(Level.INFO, "Creating Item");
-		String jsonData = req.getParameter(PARAMETER_JSON_DATA);
-		Message message = new Gson().fromJson(jsonData, Message.class);
-		MessageDao.createOrUpdateMessage(message);
+		logger.log(Level.INFO, "Creating Message");
+		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
+
+		PrintWriter out = resp.getWriter();
+
+		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
+		String jsonData = readJsonRequest(req);
+		try {
+			Message message = GSON.fromJson(jsonData, Message.class);
+			MessageDao.createOrUpdateMessage(message);
+		} catch (Exception e) {
+			String msg = DatastoreUtils.getErrorMessage(e);
+			out.print(msg);
+		}
 	}
 
 	/**
@@ -89,7 +108,7 @@ public class MessageServlet extends BaseServlet {
 		try {
 			out.println(MessageDao.deleteMessage(messageId));
 		} catch (Exception e) {
-			out.println(Util.getErrorMessage(e));
+			out.println(DatastoreUtils.getErrorMessage(e));
 		}
 	}
 
@@ -99,13 +118,16 @@ public class MessageServlet extends BaseServlet {
 	 */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String action = req.getParameter("action");
-		if (action.equalsIgnoreCase("delete")) {
-			doDelete(req, resp);
-			return;
-		} else if (action.equalsIgnoreCase("put")) {
-			doPut(req, resp);
-			return;
-		}
+		// String action = req.getParameter("action");
+		// if (action.equalsIgnoreCase("delete")) {
+		// doDelete(req, resp);
+		// return;
+		// } else if (action.equalsIgnoreCase("put")) {
+		// doPut(req, resp);
+		// return;
+		// }
+
+		doPut(req, resp);
+		return;
 	}
 }

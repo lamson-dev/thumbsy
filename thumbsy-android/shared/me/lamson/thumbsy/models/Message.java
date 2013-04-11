@@ -2,7 +2,7 @@ package me.lamson.thumbsy.models;
 
 public class Message {
 
-	public static final String ENTITY_NAME = "message";
+	public static final String ENTITY_NAME = "Message";
 	public static final String PROPERTY_ID = "messageId";
 	public static final String PROPERTY_INCOMING = "incoming";
 	public static final String PROPERTY_CONTENT = "content";

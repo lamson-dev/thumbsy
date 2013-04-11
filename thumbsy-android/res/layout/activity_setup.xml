@@ -51,7 +51,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.35"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -75,7 +74,6 @@
             android:layout_height="match_parent"
             android:layout_weight="0.20"
             android:text="Send" />
-
     </LinearLayout>
 
     <LinearLayout

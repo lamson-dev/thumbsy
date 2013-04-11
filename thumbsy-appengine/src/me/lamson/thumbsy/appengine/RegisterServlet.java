@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet that registers a device, whose registration id is identified by
  * {@link #PARAMETER_REG_ID}.
- *
+ * 
  * <p>
  * The client app should call this servlet everytime it receives a
  * {@code com.google.android.c2dm.intent.REGISTRATION C2DM} intent without an
@@ -31,14 +31,16 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class RegisterServlet extends BaseServlet {
 
-  private static final String PARAMETER_REG_ID = "regId";
+	private static final String PARAMETER_REG_ID = "regId";
+	private static final String PARAMETER_USER_ID = "userId";
 
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException {
-    String regId = getParameter(req, PARAMETER_REG_ID);
-    Datastore.register(regId);
-    setSuccess(resp);
-  }
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException {
+		String regId = getParameter(req, PARAMETER_REG_ID);
+		String userId = getParameter(req, PARAMETER_USER_ID);
+		Datastore.register(userId, regId);
+		setSuccess(resp);
+	}
 
 }

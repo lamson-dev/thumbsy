@@ -7,54 +7,54 @@ $(document).ready(function () {
 //    $("p").click(function() {
 //        $(this).hide();
 //    });
-
 });
 
 var myApp = angular.module('myApp', []);
+var postMessageUrl = "http://thumbsy-demo.appspot.com/sendAll/";
+var getConversationUrl = "http://thumbsy-demo.appspot.com/conversations/";
 
 myApp.factory('Data', function () {
     return {message: "I'm data from a service"};
 });
 
-
-function MessageCtrl($scope, $http, Data) {
+function ConversationCtrl($scope, $http, Data) {
 
     $scope.data = Data;
 
-
     $scope.messages = [
-        {text: 'blah blah', incoming: false},
-        {text: 'umbala', incoming: true}
+        {content: 'blah blah', incoming: false},
+        {content: 'umbala', incoming: true}
     ];
 
     $scope.addMessage = function (messageContent) {
-        $scope.messages.push({content: messageContent, incoming: false});
-        messageContent = '';
 
-        $http.post("http://example.appspot.com/rest/app", {"foo": "bar"})
+        var jsonObj = {content: messageContent, incoming: false};
+        $scope.messages.push(jsonObj);
+
+        $("message-box").prop("scrollHeight");
+
+        $http.post(postMessageUrl, jsonObj)
             .success(function (data, status, headers, config) {
+
                 $scope.data = data;
+                $scope.messages.push(jsonObj);
+                $scope.messageContent = '';
+
             }).error(function (data, status, headers, config) {
+
                 $scope.status = status;
+                alert("failed sending message");
+
             });
-
     };
 
-    $scope.getTotalMessages = function () {
-        return $scope.messages.length;
-    };
-
-    $scope.deleteMessage = function (index) {
-        $scope.messages.splice(index, 1);
-    };
-
-    $scope.fetchMessages = function (conversationId) {
+    $scope.fetchConversation = function (conversationId) {
 
         $scope.code = null;
         $scope.response = null;
 
         conversationId = '';
-        $http.get('conversations/' + conversationId)
+        $http.get(getConversationUrl + conversationId)
             .success(function (data, status) {
 
                 $scope.status = status;
@@ -75,6 +75,14 @@ function MessageCtrl($scope, $http, Data) {
             });
 
 
+    };
+
+    $scope.getTotalMessages = function () {
+        return $scope.messages.length;
+    };
+
+    $scope.deleteMessage = function (index) {
+        $scope.messages.splice(index, 1);
     };
 }
 

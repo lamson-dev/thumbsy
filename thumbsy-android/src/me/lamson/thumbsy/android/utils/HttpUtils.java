@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.lamson.thumbsy.android;
+package me.lamson.thumbsy.android.utils;
 
 import org.apache.http.HttpResponse;
 

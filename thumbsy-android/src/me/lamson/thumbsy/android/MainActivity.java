@@ -6,7 +6,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class MainActivity extends RootActivity implements OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

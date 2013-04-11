@@ -31,11 +31,13 @@ public class ConversationDao {
 			conversation = new Entity(Conversation.ENTITY_NAME, conv.getId());
 			conversation.setProperty(Conversation.PROPERTY_CONTENT,
 					conv.getContent());
+			conversation.setProperty(Conversation.PROPERTY_USER_ID,
+					conv.getUserId());
 		} else {
 			conversation.setProperty(Conversation.PROPERTY_CONTENT,
 					conv.getContent());
 		}
-		Util.persistEntity(conversation);
+		DatastoreUtils.persistEntity(conversation);
 	}
 
 	/**
@@ -46,7 +48,7 @@ public class ConversationDao {
 	 * @return conversations
 	 */
 	public static Iterable<Entity> getAllConversations(String kind) {
-		return Util.listEntities(kind, null, null);
+		return DatastoreUtils.listEntities(kind, null, null);
 	}
 
 	/**
@@ -58,7 +60,7 @@ public class ConversationDao {
 	 */
 	public static Entity getConversation(Long id) {
 		Key key = KeyFactory.createKey(Conversation.ENTITY_NAME, id);
-		return Util.findEntity(key);
+		return DatastoreUtils.findEntity(key);
 	}
 
 	/**
@@ -78,7 +80,7 @@ public class ConversationDao {
 				Query.FilterOperator.GREATER_THAN, parentKey));
 		// query.addFilter(Entity.KEY_RESERVED_PROPERTY,
 		// Query.FilterOperator.GREATER_THAN, parentKey);
-		List<Entity> results = Util.getDatastoreServiceInstance()
+		List<Entity> results = DatastoreUtils.getDatastoreServiceInstance()
 				.prepare(query).asList(FetchOptions.Builder.withDefaults());
 		return results;
 	}
@@ -97,7 +99,7 @@ public class ConversationDao {
 		if (!messages.isEmpty()) {
 			return "Cannot delete, as there are messages associated with this conversation.";
 		}
-		Util.deleteEntity(key);
+		DatastoreUtils.deleteEntity(key);
 		return "Product deleted successfully";
 
 	}
