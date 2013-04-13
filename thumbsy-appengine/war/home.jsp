@@ -52,21 +52,21 @@
                 in</a> to include your name with greetings you post.
         </p>
         <%
-            }
-            String status = (String) request.getAttribute("status");
-            if (status != null) {
-                out.print(status);
-            }
-            int total = Datastore.getTotalDevices();
-            if (total == 0) {
-                out.print("<h2>No devices registered!</h2>");
-            } else {
-                out.print("<h2>" + total + " device(s) registered!</h2>");
-                out.print("<form name='form' method='POST' action='sendAll'>");
-                out.print("<input type='submit' value='Send Message' />");
-                out.print("</form>");
-            }
-            response.setStatus(HttpServletResponse.SC_OK);
+        	}
+                    String status = (String) request.getAttribute("status");
+                    if (status != null) {
+                        out.print(status);
+                    }
+                    int total = DatastoreGCM.getTotalDevices();
+                    if (total == 0) {
+                        out.print("<h2>No devices registered!</h2>");
+                    } else {
+                        out.print("<h2>" + total + " device(s) registered!</h2>");
+                        out.print("<form name='form' method='POST' action='sendAll'>");
+                        out.print("<input type='submit' value='Send Message' />");
+                        out.print("</form>");
+                    }
+                    response.setStatus(HttpServletResponse.SC_OK);
         %>
 
         <!--[if lt IE 7]>

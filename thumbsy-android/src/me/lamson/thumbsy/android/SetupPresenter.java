@@ -1,16 +1,19 @@
 package me.lamson.thumbsy.android;
 
+import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
+import static me.lamson.thumbsy.android.CommonUtils.EXTRA_MESSAGE;
+import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
+import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import me.lamson.thumbsy.models.Conversation;
 import me.lamson.thumbsy.models.Message;
-import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
-import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
-import static me.lamson.thumbsy.android.CommonUtils.EXTRA_MESSAGE;
-import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -38,8 +41,9 @@ public class SetupPresenter {
 
 	private static final String TAG = SetupPresenter.class.getCanonicalName();
 
-	public static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/message";
-	public static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/conversation";
+	public static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/rest/messages";
+	public static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/conversations";
+	public static final String URL_CHECK_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/messages/conversation/";
 
 	private final ISetupView mView;
 
@@ -47,6 +51,8 @@ public class SetupPresenter {
 
 	AsyncTask<Void, Void, Void> mRegisterTask, mSendMessageTask,
 			mSendConversationTask;
+
+	private boolean isExisted = false;
 
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 		@Override
@@ -119,17 +125,22 @@ public class SetupPresenter {
 	}
 
 	public void sendMessage() {
-		final Long conversationId = Long.valueOf(200);
+		final Long conversationId = Long.valueOf(1);
+		conversationsOnServer.add(conversationId);
 
 		if (!conversationsOnServer.contains(conversationId)) {
+			// && !checkExistingConversation(conversationId)) {
+
 			final String conversationData = createConversation(conversationId);
 
 			mSendConversationTask = new AsyncTask<Void, Void, Void>() {
 
 				@Override
 				protected Void doInBackground(Void... params) {
-					if (postJsonData(URL_POST_CONVERSATION, conversationData))
+					if (postJsonData(URL_POST_CONVERSATION, conversationData)) {
 						conversationsOnServer.add(conversationId);
+						Log.i(TAG, "conversation posted to " + URL_POST_MESSAGE);
+					}
 					return null;
 				}
 
@@ -142,14 +153,18 @@ public class SetupPresenter {
 			mSendConversationTask.execute(null, null, null);
 		}
 
-		final String messageData = createMessage(null, conversationId, mView
-				.getEtxtClientMessage().getText().toString());
+		final String messageData = createMessage(Long.valueOf(20),
+				conversationId, mView.getEtxtClientMessage().getText()
+						.toString());
 
 		mSendMessageTask = new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				postJsonData(URL_POST_MESSAGE, messageData);
+				if (postJsonData(URL_POST_MESSAGE, messageData)) {
+					Log.d(TAG, messageData);
+					Log.d(TAG, "message posted to " + URL_POST_MESSAGE);
+				}
 				return null;
 			}
 
@@ -160,6 +175,49 @@ public class SetupPresenter {
 
 		};
 		mSendMessageTask.execute(null, null, null);
+	}
+
+	public boolean checkExistingConversation(final Long id) {
+
+		mSendConversationTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				HttpClient client = new DefaultHttpClient();
+				HttpConnectionParams.setConnectionTimeout(client.getParams(),
+						10000); // Timeout
+				HttpResponse response;
+
+				try {
+					HttpGet get = new HttpGet(URL_CHECK_CONVERSATION
+							+ String.valueOf(id));
+					response = client.execute(get);
+
+					/* Checking response */
+					if (response != null) {
+						Log.d(TAG, EntityUtils.toString(response.getEntity()));
+					}
+
+					isExisted = (response.getStatusLine().getStatusCode() == 200);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					Log.e(TAG, "Cannot Estabilish Connection");
+				}
+				isExisted = false;
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mSendConversationTask = null;
+			}
+
+		};
+		mSendConversationTask.execute(null, null, null);
+
+		return isExisted;
+
 	}
 
 	public void registerDevice(final Context context) {
@@ -228,7 +286,9 @@ public class SetupPresenter {
 	}
 
 	private String createMessage(Long id, Long conversationId, String message) {
-		Message m = new Message(id, conversationId, message, false);
+		Message m = new Message(id, conversationId, message, true);
+
+		Log.d(TAG, CommonUtils.GSON.toJson(m));
 		return CommonUtils.GSON.toJson(m);
 	}
 

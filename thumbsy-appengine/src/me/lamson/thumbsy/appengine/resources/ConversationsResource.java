@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,12 +15,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import com.google.gson.Gson;
-
 import me.lamson.thumbsy.appengine.ConversationDao;
-import me.lamson.thumbsy.appengine.MessageDao;
 import me.lamson.thumbsy.models.Conversation;
-import me.lamson.thumbsy.models.Message;
 
 /**
  * Brands Resource - Return responses for HTTP requests for a number of brands
@@ -72,6 +69,24 @@ public class ConversationsResource extends BaseResource {
 	@PUT
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Response putConversation(String jsonData) {
+
+		// String jsonResponse = "";
+		try {
+			Conversation conv = GSON.fromJson(jsonData, Conversation.class);
+			ConversationDao.createConversation(conv);
+			return Response.status(Response.Status.CREATED).build();
+
+		} catch (Exception e) {
+			// return Response.status(Response.Status.NOT_ACCEPTABLE)
+			// .entity(jsonResponse).build();
+			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+
+		}
+	}
+
+	@POST
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Response postConversation(String jsonData) {
 
 		// String jsonResponse = "";
 		try {

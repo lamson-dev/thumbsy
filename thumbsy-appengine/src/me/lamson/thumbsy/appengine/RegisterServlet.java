@@ -39,7 +39,7 @@ public class RegisterServlet extends BaseServlet {
 			throws ServletException {
 		String regId = getParameter(req, PARAMETER_REG_ID);
 		String userId = getParameter(req, PARAMETER_USER_ID);
-		Datastore.register(userId, regId);
+		DatastoreGCM.register(userId, regId);
 		setSuccess(resp);
 	}
 

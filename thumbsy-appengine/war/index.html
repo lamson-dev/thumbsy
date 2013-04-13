@@ -23,7 +23,6 @@
     <link rel="stylesheet" href="css/sass/thumbsy.css">
 
     <script src="js/vendor/modernizr-2.6.2.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
 
 </head>
 <body>
@@ -36,6 +35,7 @@
 <!-- Add your site or application content here -->
 <div class="navbar">
     <div class="navbar-inner fill">
+
         <a class="brand" href="#">Thumbsy</a>
         <ul class="nav">
             <li><a href="#">New Message</a></li>
@@ -53,21 +53,27 @@
     <div class="row">
 
         <!--sidebar content-->
-        <div id="sidebar" class="span3">
-            <h3>contacs here</h3>
-        </div>
+        <!--<div id="sidebar" class="span3">-->
+        <!--<h3>contacs here</h3>-->
+        <!--</div>-->
 
         <!--main content-->
         <div id="main-content" class="span9">
 
-            <div class="conversation-box span5" ng-controller="ConversationCtrl">
-                <button class="btn" ng-click="fetchConversation()">Fetch Conversation</button>
-                <p>Number of Messages: {{getTotalMessages()}}</p>
-
-                <form class="form-inline">
-                    <input type="text" class="input-small" name="new-message" ng-model="messageContent"/>
+            <div id="ConversationCtrl" class="conversation-box" ng-controller="ConversationCtrl">
+                <!--<div style="padding: 10px;">-->
+                <!--<span>Number of Messages: {{getTotalMessages()}}</span>-->
+                <!--<button class="btn" ng-click="fetchConversation()" style="margin-left: 40px;">Fetch Conversation-->
+                <!--</button>-->
+                <!--</div>-->
+                <form class="user-input form-inline">
+                    <!--<input type="text" class="input" name="new-message" placeholder="Type your message here"-->
+                    <!--ng-model="messageContent"/>-->
+                    <textarea name="new-message" placeholder="Type your message here"
+                              ng-model="messageContent"></textarea>
                     <button class="btn" ng-click="addMessage(messageContent)">Send <i
                             class="icon-ok-sign"></i></button>
+                    <span class="char-count">{{getCharCount(messageContent)}}</span>
                 </form>
                 <div class="messages-box">
                     <div ng-repeat="message in messages" ng-model="message.incoming">
@@ -92,6 +98,7 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
 

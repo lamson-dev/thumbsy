@@ -51,7 +51,7 @@ public class DeviceServlet extends BaseServlet {
 		if (status != null) {
 			out.print(status);
 		}
-		int total = Datastore.getTotalDevices();
+		int total = DatastoreGCM.getTotalDevices();
 		if (total == 0) {
 			out.print("<h2>No devices registered!</h2>");
 		} else {

@@ -17,9 +17,7 @@ package me.lamson.thumbsy.appengine;
 
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +31,6 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
-import com.google.gson.Gson;
 
 /**
  * Servlet that adds a new message to all registered devices.
@@ -49,7 +46,7 @@ public class SendAllMessagesServlet extends BaseServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
-		List<String> devices = Datastore.getDevices();
+		List<String> devices = DatastoreGCM.getDevices();
 		String status;
 		if (devices.isEmpty()) {
 			status = "Message ignored as there is no device registered!";
@@ -57,49 +54,53 @@ public class SendAllMessagesServlet extends BaseServlet {
 
 			String jsonData = readJsonRequest(req);
 			Message msg = GSON.fromJson(jsonData, Message.class);
-			
-
 			String messageContent = msg.getContent();
-			// String messageContent = req
-			// .getParameter(SendMessageServlet.PARAMETER_MESSAGE);
+
+			// NOTE: when succeed sending message, save to datastore
+			// should complete by android client, when message sent,
+			// android post, then real time API fetch
+			MessageDao.createMessage(msg); // for now insert to datastore
+
 			Queue queue = QueueFactory.getQueue("gcm");
 			// NOTE: check below is for demonstration purposes; a real
 			// application
 			// could always send a multicast, even for just one recipient
-			if (devices.size() == 1) {
-				// send a single message using plain post
-				String device = devices.get(0);
-				queue.add(withUrl("/send").param(
-						SendMessageServlet.PARAMETER_DEVICE, device).param(
-						SendMessageServlet.PARAMETER_MESSAGE, messageContent));
-				status = "Single message queued for registration id: \n"
-						+ device + "\nMessage Content: " + messageContent;
-			} else {
-				// send a multicast message using JSON
-				// must split in chunks of 1000 devices (GCM limit)
-				int total = devices.size();
-				List<String> partialDevices = new ArrayList<String>(total);
-				int counter = 0;
-				int tasks = 0;
-				for (String device : devices) {
-					counter++;
-					partialDevices.add(device);
-					int partialSize = partialDevices.size();
-					if (partialSize == Datastore.MULTICAST_SIZE
-							|| counter == total) {
-						String multicastKey = Datastore
-								.createMulticast(partialDevices);
-						logger.fine("Queuing " + partialSize
-								+ " devices on multicast " + multicastKey);
-						TaskOptions taskOptions = TaskOptions.Builder
-								.withUrl("/send")
-								.param(SendMessageServlet.PARAMETER_MULTICAST,
-										multicastKey).method(Method.POST);
-						queue.add(taskOptions);
-						partialDevices.clear();
-						tasks++;
-					}
+			// if (devices.size() == 1) {
+			// // send a single message using plain post
+			// String device = devices.get(0);
+			// queue.add(withUrl("/send").param(
+			// SendMessageServlet.PARAMETER_DEVICE, device).param(
+			// SendMessageServlet.PARAMETER_MESSAGE, messageContent));
+			// status = "Single message queued for registration id: \n"
+			// + device + "\nMessage Content: " + messageContent;
+			// } else {
+			// send a multicast message using JSON
+			// must split in chunks of 1000 devices (GCM limit)
+			int total = devices.size();
+			List<String> partialDevices = new ArrayList<String>(total);
+			int counter = 0;
+			int tasks = 0;
+			for (String device : devices) {
+				counter++;
+				partialDevices.add(device);
+				int partialSize = partialDevices.size();
+				if (partialSize == DatastoreGCM.MULTICAST_SIZE
+						|| counter == total) {
+					String multicastKey = DatastoreGCM
+							.createMulticast(partialDevices);
+					logger.fine("Queuing " + partialSize
+							+ " devices on multicast " + multicastKey);
+					TaskOptions taskOptions = TaskOptions.Builder
+							.withUrl("/send")
+							.param(SendMessageServlet.PARAMETER_MULTICAST,
+									multicastKey)
+							.param(SendMessageServlet.PARAMETER_MESSAGE,
+									messageContent).method(Method.POST);
+					queue.add(taskOptions);
+					partialDevices.clear();
+					tasks++;
 				}
+				// }
 				status = "Queued tasks to send " + tasks
 						+ " multicast messages to " + total + " devices";
 			}
@@ -107,5 +108,4 @@ public class SendAllMessagesServlet extends BaseServlet {
 		// req.setAttribute(HomeServlet.ATTRIBUTE_STATUS, status.toString());
 		// getServletContext().getRequestDispatcher("/home").forward(req, resp);
 	}
-
 }

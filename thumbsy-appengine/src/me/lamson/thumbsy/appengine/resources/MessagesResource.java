@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -71,6 +72,24 @@ public class MessagesResource extends BaseResource {
 	@PUT
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Response putMessage(String jsonData) {
+
+		// String jsonResponse = "";
+		try {
+			Message msg = new Gson().fromJson(jsonData, Message.class);
+			MessageDao.createMessage(msg);
+			return Response.status(Response.Status.CREATED).build();
+
+		} catch (Exception e) {
+			// return Response.status(Response.Status.NOT_ACCEPTABLE)
+			// .entity(jsonResponse).build();
+			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+
+		}
+	}
+
+	@POST
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Response postMessage(String jsonData) {
 
 		// String jsonResponse = "";
 		try {

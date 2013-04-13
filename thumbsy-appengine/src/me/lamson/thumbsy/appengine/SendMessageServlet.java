@@ -98,14 +98,15 @@ public class SendMessageServlet extends BaseServlet {
 			}
 		}
 		String regId = req.getParameter(PARAMETER_DEVICE);
+		String message = req.getParameter(PARAMETER_MESSAGE);
 		if (regId != null) {
-			String message = req.getParameter(PARAMETER_MESSAGE);
 			sendSingleMessage(regId, resp, message);
 			return;
 		}
 		String multicastKey = req.getParameter(PARAMETER_MULTICAST);
 		if (multicastKey != null) {
-			sendMulticastMessage(multicastKey, resp);
+
+			sendMulticastMessage(multicastKey, resp, message);
 			return;
 		}
 		logger.severe("Invalid request!");
@@ -116,8 +117,11 @@ public class SendMessageServlet extends BaseServlet {
 	private void sendSingleMessage(String regId, HttpServletResponse resp,
 			String newMessage) {
 		logger.info("Sending message to device " + regId);
+
+		// NOTE: modified this
 		Message message = new Message.Builder().addData("content", newMessage)
 				.build();
+
 		Result result;
 		try {
 			result = sender.sendNoRetry(message, regId);
@@ -136,13 +140,13 @@ public class SendMessageServlet extends BaseServlet {
 			if (canonicalRegId != null) {
 				// same device has more than on registration id: update it
 				logger.finest("canonicalRegId " + canonicalRegId);
-				Datastore.updateRegistration(regId, canonicalRegId);
+				DatastoreGCM.updateRegistration(regId, canonicalRegId);
 			}
 		} else {
 			String error = result.getErrorCodeName();
 			if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
 				// application has been removed from device - unregister it
-				Datastore.unregister(regId);
+				DatastoreGCM.unregister(regId);
 			} else {
 				logger.severe("Error sending message to device " + regId + ": "
 						+ error);
@@ -151,10 +155,14 @@ public class SendMessageServlet extends BaseServlet {
 	}
 
 	private void sendMulticastMessage(String multicastKey,
-			HttpServletResponse resp) {
+			HttpServletResponse resp, String newMessage) {
 		// Recover registration ids from datastore
-		List<String> regIds = Datastore.getMulticast(multicastKey);
-		Message message = new Message.Builder().build();
+		List<String> regIds = DatastoreGCM.getMulticast(multicastKey);
+
+		// NOTE: modified this
+		Message message = new Message.Builder().addData("content", newMessage)
+				.build();
+
 		MulticastResult multicastResult;
 		try {
 			multicastResult = sender.sendNoRetry(message, regIds);
@@ -172,7 +180,7 @@ public class SendMessageServlet extends BaseServlet {
 						.getCanonicalRegistrationId();
 				if (canonicalRegId != null) {
 					String regId = regIds.get(i);
-					Datastore.updateRegistration(regId, canonicalRegId);
+					DatastoreGCM.updateRegistration(regId, canonicalRegId);
 				}
 			}
 		}
@@ -189,7 +197,7 @@ public class SendMessageServlet extends BaseServlet {
 					if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
 						// application has been removed from device - unregister
 						// it
-						Datastore.unregister(regId);
+						DatastoreGCM.unregister(regId);
 					}
 					if (error.equals(Constants.ERROR_UNAVAILABLE)) {
 						retriableRegIds.add(regId);
@@ -198,7 +206,7 @@ public class SendMessageServlet extends BaseServlet {
 			}
 			if (!retriableRegIds.isEmpty()) {
 				// update task
-				Datastore.updateMulticast(multicastKey, retriableRegIds);
+				DatastoreGCM.updateMulticast(multicastKey, retriableRegIds);
 				allDone = false;
 				retryTask(resp);
 			}
@@ -211,7 +219,7 @@ public class SendMessageServlet extends BaseServlet {
 	}
 
 	private void multicastDone(HttpServletResponse resp, String encodedKey) {
-		Datastore.deleteMulticast(encodedKey);
+		DatastoreGCM.deleteMulticast(encodedKey);
 		taskDone(resp);
 	}
 

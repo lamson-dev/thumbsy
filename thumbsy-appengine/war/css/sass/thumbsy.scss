@@ -41,20 +41,45 @@ html, body {
   @include shadowed;
   background-color: $msgbox-color;
   margin-top: 20px;
+  height: 500px;
+  width: 400px;
 
+  .messages-box {
+    overflow: auto;
+    height: 350px;
 
-  p {
-    @include rounded;
+    p {
+      @include rounded;
+      padding: 10px;
+      margin: 10px;
+    }
+
+  }
+
+  .user-input {
+    height: 100px;
+    position: absolute;
+    top: 480px;
+    margin: 5px;
     padding: 5px;
 
-    margin-top: 1px;
-    margin-bottom: 1px;
-  }
-}
+    button {
+      margin-left: 10px;
+      width: 100px;
+      height: 50px;
+    }
 
-.messages-box {
-  overflow: auto;
-  height: 400px;
+    textarea {
+      width: 250px;
+    }
+
+    .char-count {
+      position: absolute;
+      top: 70px;
+      right: 125px;
+    }
+  }
+
 }
 
 .incoming-true {

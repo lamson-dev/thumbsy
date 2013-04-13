@@ -25,7 +25,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-
     <servlet>
         <servlet-name>Thumbsy REST Service</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -86,18 +85,6 @@
     <servlet-mapping>
         <servlet-name>SendMessageServlet</servlet-name>
         <url-pattern>/send</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>HomeServlet</servlet-name>
-        <servlet-class>
-            me.lamson.thumbsy.appengine.HomeServlet
-        </servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>HomeServlet</servlet-name>
-        <url-pattern>/home</url-pattern>
     </servlet-mapping>
 
     <servlet>

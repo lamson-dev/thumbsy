@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * This class is neither persistent (it will lost the data when the app is
  * restarted) nor thread safe.
  */
-public final class Datastore {
+public final class DatastoreGCM {
 
 	static final int MULTICAST_SIZE = 1000;
 	private static final String DEVICE_TYPE = "Device";
@@ -51,12 +51,12 @@ public final class Datastore {
 	private static final FetchOptions DEFAULT_FETCH_OPTIONS = FetchOptions.Builder
 			.withPrefetchSize(MULTICAST_SIZE).chunkSize(MULTICAST_SIZE);
 
-	private static final Logger logger = Logger.getLogger(Datastore.class
+	private static final Logger logger = Logger.getLogger(DatastoreGCM.class
 			.getName());
 	private static final DatastoreService datastore = DatastoreServiceFactory
 			.getDatastoreService();
 
-	private Datastore() {
+	private DatastoreGCM() {
 		throw new UnsupportedOperationException();
 	}
 
