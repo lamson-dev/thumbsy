@@ -1,5 +1,12 @@
 package me.lamson.thumbsy.models;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+
+@XmlRootElement
+@Entity
 public class Conversation {
 
 	public static final String ENTITY_NAME = "Conversation";
@@ -7,9 +14,11 @@ public class Conversation {
 	public static final String PROPERTY_USER_ID = "content";
 	public static final String PROPERTY_CONTENT = "content";
 
+	@Id
 	private Long id;
-	private String content;
 	private String userId;
+	private String recipientName;
+	private Integer numberOfMessages = 0;
 
 	public Conversation() {
 	}
@@ -21,7 +30,7 @@ public class Conversation {
 	public Conversation(Long id, String userId, String content) {
 		this.id = id;
 		this.userId = userId;
-		this.content = content;
+		this.recipientName = content;
 	}
 
 	public String getUserId() {
@@ -37,10 +46,18 @@ public class Conversation {
 	}
 
 	public String getContent() {
-		return content;
+		return recipientName;
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.recipientName = content;
+	}
+
+	public Integer getNumberOfMessages() {
+		return numberOfMessages;
+	}
+
+	public void updateNumberOfMessages() {
+		this.numberOfMessages++;
 	}
 }

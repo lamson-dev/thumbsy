@@ -1,7 +1,5 @@
 package me.lamson.thumbsy.appengine;
 
-import static me.lamson.thumbsy.appengine.OfyService.ofy;
-
 import java.util.List;
 
 import me.lamson.thumbsy.models.Conversation;
@@ -16,26 +14,46 @@ import com.google.appengine.api.datastore.Query;
  * This class handles all the CRUD operations related to Product entity.
  * 
  */
-public class ConversationDao {
+public class ConversationDaoCopy {
 
-	public static void createConversation(Conversation conversation) {
-		ofy().save().entity(conversation);
+	/**
+	 * Update the conversation
+	 * 
+	 * @param name
+	 *            : name of the conversation
+	 * @param description
+	 *            : description
+	 * @return updated conversation
+	 */
+	public static void createOrUpdateConversation(Conversation conv) {
+		// Entity user = getUser(conv.getUserId());
+
+		Entity conversation = getConversation(conv.getId());
+
+		if (conversation == null) {
+			conversation = new Entity(Conversation.ENTITY_NAME, conv.getId());
+			// conversation = new Entity(Conversation.ENTITY_NAME,
+			// user.getId());
+			conversation.setProperty(Conversation.PROPERTY_USER_ID,
+					conv.getUserId());
+			conversation.setProperty(Conversation.PROPERTY_CONTENT,
+					conv.getContent());
+		} else {
+			conversation.setProperty(Conversation.PROPERTY_CONTENT,
+					conv.getContent());
+		}
+		DatastoreUtils.persistEntity(conversation);
 	}
 
-	public static void deleteConversation(Conversation conv) {
-		ofy().delete().entity(conv);
-	}
-
-	public static void deleteConversationById(Long id) {
-		ofy().delete().type(Conversation.class).id(id);
-	}
-
-	public static Conversation getConversationById(Long id) {
-		return ofy().load().type(Conversation.class).id(id).get();
-	}
-
-	public static List<Conversation> getAllConversations() {
-		return ofy().load().type(Conversation.class).list();
+	/**
+	 * Return all the conversations
+	 * 
+	 * @param kind
+	 *            : of kind conversation
+	 * @return conversations
+	 */
+	public static Iterable<Entity> getAllConversations(String kind) {
+		return DatastoreUtils.listEntities(kind, null, null);
 	}
 
 	/**

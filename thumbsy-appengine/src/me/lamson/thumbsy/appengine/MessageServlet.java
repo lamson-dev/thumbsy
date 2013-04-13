@@ -26,6 +26,7 @@ import me.lamson.thumbsy.models.Conversation;
 import me.lamson.thumbsy.models.Message;
 
 import com.google.appengine.api.datastore.Entity;
+import com.googlecode.objectify.Key;
 
 /**
  * This servlet responds to the request corresponding to items. The class
@@ -35,8 +36,6 @@ import com.google.appengine.api.datastore.Entity;
  */
 @SuppressWarnings("serial")
 public class MessageServlet extends BaseServlet {
-
-	static final String PARAMETER_JSON_DATA = "jsonData";
 
 	private static final Logger logger = Logger.getLogger(MessageServlet.class
 			.getCanonicalName());
@@ -51,28 +50,28 @@ public class MessageServlet extends BaseServlet {
 		super.doGet(req, resp);
 		logger.log(Level.INFO, "Obtaining Message listing");
 
-		String searchBy = req.getParameter("message-searchby");
-		String searchFor = req.getParameter("conversationId");
-
-		PrintWriter out = resp.getWriter();
-		if (searchFor == null || searchFor.equals("")) {
-
-			Iterable<Entity> entities = MessageDao.getAllMessages();
-			out.println(DatastoreUtils.writeJSON(entities));
-
-		} else if (searchBy == null || searchBy.equals("messageId")) {
-
-			Iterable<Entity> entities = MessageDao.getMessage(Long
-					.valueOf(searchFor));
-			out.println(DatastoreUtils.writeJSON(entities));
-
-		} else if (searchBy != null && searchBy.equals("conversationId")) {
-
-			Iterable<Entity> entities = MessageDao.getMessagesForConversation(
-					"Message", Long.valueOf(searchFor));
-
-			out.println(DatastoreUtils.writeJSON(entities));
-		}
+		// String searchBy = req.getParameter("message-searchby");
+		// String searchFor = req.getParameter("conversationId");
+		//
+		// PrintWriter out = resp.getWriter();
+		// if (searchFor == null || searchFor.equals("")) {
+		//
+		// Iterable<Entity> entities = MessageDao.getAllMessages();
+		// out.println(DatastoreUtils.writeJSON(entities));
+		//
+		// } else if (searchBy == null || searchBy.equals("messageId")) {
+		//
+		// Iterable<Entity> entities = MessageDao.getMessage(Long
+		// .valueOf(searchFor));
+		// out.println(DatastoreUtils.writeJSON(entities));
+		//
+		// } else if (searchBy != null && searchBy.equals("conversationId")) {
+		//
+		// Iterable<Entity> entities = MessageDao.getMessagesForConversation(
+		// "Message", Long.valueOf(searchFor));
+		//
+		// out.println(DatastoreUtils.writeJSON(entities));
+		// }
 	}
 
 	/**
@@ -81,19 +80,20 @@ public class MessageServlet extends BaseServlet {
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		logger.log(Level.INFO, "Creating Message");
-		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
 
-		PrintWriter out = resp.getWriter();
+		// PrintWriter out = resp.getWriter();
 
-		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
 		String jsonData = readJsonRequest(req);
-		try {
-			Message message = GSON.fromJson(jsonData, Message.class);
-			MessageDao.createOrUpdateMessage(message);
-		} catch (Exception e) {
-			String msg = DatastoreUtils.getErrorMessage(e);
-			out.print(msg);
-		}
+		Message message = GSON.fromJson(jsonData, Message.class);
+		MessageDao.createMessage(message);
+
+		// try {
+		// Message message = GSON.fromJson(jsonData, Message.class);
+		// MessageDao.createOrUpdateMessage(message);
+		// } catch (Exception e) {
+		// String msg = DatastoreUtils.getErrorMessage(e);
+		// out.print(msg);
+		// }
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class MessageServlet extends BaseServlet {
 		Long messageId = Long.parseLong(req.getParameter("id"));
 		PrintWriter out = resp.getWriter();
 		try {
-			out.println(MessageDao.deleteMessage(messageId));
+			// out.println(MessageDao.deleteMessage(messageId));
 		} catch (Exception e) {
 			out.println(DatastoreUtils.getErrorMessage(e));
 		}

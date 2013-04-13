@@ -10,8 +10,8 @@ $(document).ready(function () {
 });
 
 var myApp = angular.module('myApp', []);
-var postMessageUrl = "http://thumbsy-demo.appspot.com/sendAll/";
-var getConversationUrl = "http://thumbsy-demo.appspot.com/conversations/";
+var postMessageUrl = "http://thumbsy-demo.appspot.com/sendAll";
+var getConversationUrl = "http://thumbsy-demo.appspot.com/conversation";
 
 myApp.factory('Data', function () {
     return {message: "I'm data from a service"};
@@ -29,8 +29,6 @@ function ConversationCtrl($scope, $http, Data) {
     $scope.addMessage = function (messageContent) {
 
         var jsonObj = {content: messageContent, incoming: false};
-        $scope.messages.push(jsonObj);
-
         $("message-box").prop("scrollHeight");
 
         $http.post(postMessageUrl, jsonObj)

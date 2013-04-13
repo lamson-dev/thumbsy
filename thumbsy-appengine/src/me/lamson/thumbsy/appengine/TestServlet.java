@@ -23,6 +23,11 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.models.Conversation;
+import me.lamson.thumbsy.models.Message;
+
+import com.googlecode.objectify.Key;
+
 /**
  * Servlet that adds display number of devices and button to send a message.
  * <p>
@@ -34,13 +39,38 @@ public class TestServlet extends BaseServlet {
 
 	static final String ATTRIBUTE_STATUS = "status";
 
+	Conversation c;
+	Message m;
+	String json;
+	PrintWriter writer;
+
 	/**
 	 * Displays the existing messages and offer the option to send a new one.
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		doPost(req, resp);
+
+		c = new Conversation(Long.valueOf(1), "206-432-5142", "Son");
+		json = GSON.toJson(c);
+
+		writer = resp.getWriter();
+		writer.print(json);
+		writer.close();
+		resp.setStatus(HttpServletResponse.SC_OK);
+		// doPost(req, resp);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		resp.setContentType("application/json");
+		m = new Message(Long.valueOf(1), c.getId(), "message content", false);
+		json = GSON.toJson(m);
+		writer = resp.getWriter();
+		writer.print(json);
+		writer.close();
+		resp.setStatus(HttpServletResponse.SC_OK);
 	}
 
 	@Override
@@ -80,29 +110,4 @@ public class TestServlet extends BaseServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 	}
 
-	/**
-	 * Read Bing URL when make API call to get JSON data
-	 * 
-	 * @param urlString
-	 * @return JSON data as a String
-	 * @throws Exception
-	 */
-	// private String readBingUrl(String urlString) throws Exception {
-	// Authenticator.setDefault(new BingAuthenticator());
-	// BufferedReader reader = null;
-	// try {
-	// URL url = new URL(urlString);
-	// reader = new BufferedReader(new InputStreamReader(url.openStream()));
-	// StringBuffer buffer = new StringBuffer();
-	// int read;
-	// char[] chars = new char[1024];
-	// while ((read = reader.read(chars)) != -1)
-	// buffer.append(chars, 0, read);
-	//
-	// return buffer.toString();
-	// } finally {
-	// if (reader != null)
-	// reader.close();
-	// }
-	// }
 }

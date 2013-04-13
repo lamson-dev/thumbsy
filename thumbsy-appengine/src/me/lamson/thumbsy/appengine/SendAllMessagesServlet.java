@@ -57,6 +57,7 @@ public class SendAllMessagesServlet extends BaseServlet {
 
 			String jsonData = readJsonRequest(req);
 			Message msg = GSON.fromJson(jsonData, Message.class);
+			
 
 			String messageContent = msg.getContent();
 			// String messageContent = req

@@ -51,17 +51,17 @@ public class ConversationServlet extends BaseServlet {
 			throws ServletException, IOException {
 		super.doGet(req, resp);
 		logger.log(Level.INFO, "Obtaining conversation listing");
-		
+
 		String searchFor = req.getParameter("id");
-		
+
 		PrintWriter out = resp.getWriter();
 		Iterable<Entity> entities = null;
 		if (searchFor == null || searchFor.equals("") || searchFor == "*") {
-			entities = ConversationDao
+			entities = ConversationDaoCopy
 					.getAllConversations(Conversation.ENTITY_NAME);
 			out.println(DatastoreUtils.writeJSON(entities));
 		} else {
-			Entity conversation = ConversationDao.getConversation(Long
+			Entity conversation = ConversationDaoCopy.getConversation(Long
 					.parseLong(searchFor));
 			if (conversation != null) {
 				Set<Entity> result = new HashSet<Entity>();
@@ -81,15 +81,20 @@ public class ConversationServlet extends BaseServlet {
 
 		// String jsonData = req.getParameter(PARAMETER_JSON_DATA);
 		String jsonData = readJsonRequest(req);
-		try {
-			Conversation conversation = GSON.fromJson(jsonData,
-					Conversation.class);
 
-			ConversationDao.createOrUpdateConversation(conversation);
-		} catch (Exception e) {
-			String msg = DatastoreUtils.getErrorMessage(e);
-			out.print(msg);
-		}
+		Conversation conversation = GSON.fromJson(jsonData, Conversation.class);
+
+		ConversationDao.createConversation(conversation);
+
+		// try {
+		// Conversation conversation = GSON.fromJson(jsonData,
+		// Conversation.class);
+		//
+		// ConversationDaoCopy.createOrUpdateConversation(conversation);
+		// } catch (Exception e) {
+		// String msg = DatastoreUtils.getErrorMessage(e);
+		// out.print(msg);
+		// }
 	}
 
 	/**
@@ -100,7 +105,7 @@ public class ConversationServlet extends BaseServlet {
 		String conversationkey = req.getParameter("id");
 		PrintWriter out = resp.getWriter();
 		try {
-			out.println(ConversationDao.deleteConversation(Long
+			out.println(ConversationDaoCopy.deleteConversation(Long
 					.parseLong(conversationkey)));
 		} catch (Exception e) {
 			out.println(DatastoreUtils.getErrorMessage(e));
@@ -120,8 +125,8 @@ public class ConversationServlet extends BaseServlet {
 		// doPut(req, resp);
 		// return;
 		// }
-		
-		doPut(req,resp);
+
+		doPut(req, resp);
 		return;
 	}
 
