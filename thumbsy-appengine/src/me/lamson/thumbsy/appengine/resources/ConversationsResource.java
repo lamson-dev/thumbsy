@@ -67,7 +67,7 @@ public class ConversationsResource extends BaseResource {
 	}
 
 	@PUT
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response putConversation(String jsonData) {
 
 		// String jsonResponse = "";

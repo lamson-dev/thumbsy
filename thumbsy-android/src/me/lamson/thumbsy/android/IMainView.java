@@ -1,5 +1,6 @@
 package me.lamson.thumbsy.android;
 
+import android.content.Context;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -9,7 +10,7 @@ import android.widget.TextView;
  * 
  * @version $Revision: 1.0 $
  */
-public interface ISetupView {
+public interface IMainView {
 
 	public TextView getTvServerMessage();
 
@@ -27,9 +28,11 @@ public interface ISetupView {
 
 	public void setTvDeviceRegistered(TextView tvDeviceRegistered);
 
-	public EditText getEtxtClientMessage();
+	public EditText getEditClientMessage();
 
-	public void setEtxtClientMessage(EditText etxtClientMessage);
+	public void setEditClientMessage(EditText etxtClientMessage);
 
 	public void sayAlreadyRegistered();
+
+	public Context getContext();
 }

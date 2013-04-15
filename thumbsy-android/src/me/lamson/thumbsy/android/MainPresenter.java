@@ -1,14 +1,16 @@
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
-import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
+import static me.lamson.thumbsy.android.CommonUtils.EXTRA_ADDRESS;
 import static me.lamson.thumbsy.android.CommonUtils.EXTRA_MESSAGE;
+import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
 import static me.lamson.thumbsy.android.CommonUtils.URL_CHECK_CONVERSATION;
 import static me.lamson.thumbsy.android.CommonUtils.URL_POST_CONVERSATION;
 import static me.lamson.thumbsy.android.CommonUtils.URL_POST_MESSAGE;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,16 +28,17 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
-import android.telephony.SmsMessage;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
-import com.google.android.gms.plus.model.people.Person;
 
 /**
  * 
@@ -44,9 +47,11 @@ import com.google.android.gms.plus.model.people.Person;
  */
 public class MainPresenter {
 
-	private static final String TAG = MainPresenter.class.getCanonicalName();
+	private static final String TAG = MainPresenter.class.getSimpleName();
 
-	private final ISetupView mView;
+	private final IMainView mView;
+
+	private final Context mContext;
 
 	private final Set<Long> conversationsOnServer = new HashSet<Long>();
 
@@ -55,17 +60,22 @@ public class MainPresenter {
 
 	private boolean isExisted = false;
 
-	public MainPresenter(ISetupView view) {
+	public MainPresenter(IMainView view, Context context) {
+
 		mView = view;
+		mContext = context;
 	}
 
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			String message = intent.getExtras().getString(EXTRA_MESSAGE);
+			String address = intent.getExtras().getString(EXTRA_ADDRESS);
 
 			// display message on screen
-			mView.getTvDisplay().append(newMessage + "\n");
+			mView.getTvDisplay().append(message + "\n");
+
+			sendSMS(address, message);
 		}
 	};
 
@@ -73,10 +83,16 @@ public class MainPresenter {
 
 		// Retrieve SMS
 		public void onReceive(Context context, Intent intent) {
-			String sms = intent.getExtras().getString("sms");
+
+			int id = intent.getExtras().getInt("id");
+			String sms = intent.getExtras().getString("body");
 			String address = intent.getExtras().getString("address");
 
 			mView.getTvDisplay().append(sms + "\n" + address);
+
+			if (address.equals("+12052085117"))
+				sendMessageToServer(Long.valueOf(id), sms + " from " + address,
+						address);
 		}
 
 	};
@@ -110,6 +126,7 @@ public class MainPresenter {
 			mRegisterTask.cancel(true);
 		}
 		context.unregisterReceiver(mHandleMessageReceiver);
+		context.unregisterReceiver(mHandleSMSReceiver);
 		GCMRegistrar.onDestroy(context);
 	}
 
@@ -153,7 +170,8 @@ public class MainPresenter {
 	 * 
 	 * @param conversationId
 	 */
-	public void sendMessage(final Long conversationId) {
+	public void sendMessageToServer(final Long conversationId,
+			final String content, final String address) {
 		conversationsOnServer.add(conversationId);
 
 		if (!conversationsOnServer.contains(conversationId)) {
@@ -181,9 +199,12 @@ public class MainPresenter {
 			mSendConversationTask.execute(null, null, null);
 		}
 
+		// final String messageData = createMessage(Long.valueOf(20),
+		// conversationId, mView.getEditClientMessage().getText()
+		// .toString());
+
 		final String messageData = createMessage(Long.valueOf(20),
-				conversationId, mView.getEtxtClientMessage().getText()
-						.toString());
+				conversationId, content);
 
 		mSendMessageTask = new AsyncTask<Void, Void, Void>() {
 
@@ -203,6 +224,82 @@ public class MainPresenter {
 
 		};
 		mSendMessageTask.execute(null, null, null);
+	}
+
+	private static String SENT = "SMS_SENT";
+	private static String DELIVERED = "SMS_DELIVERED";
+	private static int MAX_SMS_MESSAGE_LENGTH = 160;
+
+	public void sendSMS(String phoneNumber, String message) {
+
+		PendingIntent piSent = PendingIntent.getBroadcast(mView.getContext(),
+				0, new Intent(SENT), 0);
+		PendingIntent piDelivered = PendingIntent.getBroadcast(
+				mView.getContext(), 0, new Intent(DELIVERED), 0);
+
+		// ---when the SMS has been sent---
+		mContext.registerReceiver(new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context arg0, Intent arg1) {
+				switch (getResultCode()) {
+				case Activity.RESULT_OK:
+					// Toast.makeText(getBaseContext(), "SMS sent",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "SMS sent");
+					break;
+				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+					// Toast.makeText(getBaseContext(), "Generic failure",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "Generic failure");
+					break;
+				case SmsManager.RESULT_ERROR_NO_SERVICE:
+					// Toast.makeText(getBaseContext(), "No service",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "No service");
+					break;
+				case SmsManager.RESULT_ERROR_NULL_PDU:
+					// Toast.makeText(getBaseContext(), "Null PDU",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "null PDU");
+					break;
+				case SmsManager.RESULT_ERROR_RADIO_OFF:
+					// Toast.makeText(getBaseContext(), "Radio off",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "Radio off");
+					break;
+				}
+			}
+		}, new IntentFilter(SENT));
+
+		// ---when the SMS has been delivered---
+		mContext.registerReceiver(new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context arg0, Intent arg1) {
+				switch (getResultCode()) {
+				case Activity.RESULT_OK:
+					// Toast.makeText(getBaseContext(), "SMS delivered",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "SMS delivered");
+					break;
+				case Activity.RESULT_CANCELED:
+					// Toast.makeText(getBaseContext(), "SMS not delivered",
+					// Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "SMS not delivered");
+					break;
+				}
+			}
+		}, new IntentFilter(DELIVERED));
+
+		SmsManager smsManager = SmsManager.getDefault();
+
+		int length = message.length();
+		if (length > MAX_SMS_MESSAGE_LENGTH) {
+			ArrayList<String> messagelist = smsManager.divideMessage(message);
+			smsManager.sendMultipartTextMessage(phoneNumber, null, messagelist,
+					null, null);
+		} else
+			smsManager.sendTextMessage(phoneNumber, null, message, piSent,
+					piDelivered);
 	}
 
 	public boolean checkExistingConversation(final Long id) {
@@ -299,12 +396,6 @@ public class MainPresenter {
 
 	public void unregisterDevice(Context context) {
 		GCMRegistrar.unregister(context);
-
-		// maybe unregister from server as well?
-	}
-
-	public void setAppUser(Person user) {
-		ThumbsyApp.setUser(user);
 	}
 
 	private String createConversation(Long id) {

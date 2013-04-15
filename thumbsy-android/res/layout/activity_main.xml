@@ -1,58 +1,87 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
-
-    <!-- android:text="@string/hello_world" /> -->
+    android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.10" >
+
+        <TextView
+            android:id="@+id/tv_signin_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.35"
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/txt_regstatus"
+            android:id="@+id/tv_device_register"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.05"
-            android:text="Device registered?"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:layout_weight="0.10"
+            android:text="Device Registered?"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/tv_display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.30"
-            android:orientation="vertical" >
-
-            <EditText
-                android:id="@+id/etxt_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:ems="10"
-                android:inputType="textMultiLine" />
-
-            <Button
-                android:id="@+id/btn_post"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Post" />
-
-            <TextView
-                android:id="@+id/txt_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.30"
-                android:text="Incoming Message"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-        </LinearLayout>
+            android:layout_weight="0.35"
+            android:maxLines="10"
+            android:scrollbars="vertical"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25" >
+
+        <EditText
+            android:id="@+id/et_client_message"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="test message" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.20"
+            android:text="Send" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.10"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.10" >
+
+        <Button
+            android:id="@+id/btn_gplus_revoke"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.50"
+            android:text="Revoke" />
+    </LinearLayout>
+
+</LinearLayout>

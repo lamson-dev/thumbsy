@@ -36,8 +36,8 @@
     <string name="options_exit">Exit</string>
     <string name="btn_register">Register</string>
     <string name="btn_unregister">Unregister</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_setup">SetupActivity</string>
+    <string name="label_activity_main">MainActivity</string>
+    <string name="label_activity_signin">LoginActivity</string>
     <string name="change_locale">Change Locale</string>
     <string name="list_moments_title">Touch a moment to delete</string>
     <string name="send_interactive_button_name">Send Interactive Post</string>

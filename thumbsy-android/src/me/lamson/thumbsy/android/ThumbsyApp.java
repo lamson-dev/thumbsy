@@ -36,6 +36,7 @@ public class ThumbsyApp extends Application {
 
 	private static Context mContext;
 	private static Person mUser;
+	private static boolean mAppIsRegistered;
 
 	@Override
 	public void onCreate() {
@@ -70,6 +71,14 @@ public class ThumbsyApp extends Application {
 
 	public static Person getUser() {
 		return mUser;
+	}
+
+	public static boolean appIsRegistered() {
+		return mAppIsRegistered;
+	}
+
+	public static void setAppIsRegistered(boolean mAppIsRegistered) {
+		ThumbsyApp.mAppIsRegistered = mAppIsRegistered;
 	}
 
 }

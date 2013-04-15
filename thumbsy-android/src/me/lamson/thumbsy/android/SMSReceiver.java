@@ -22,11 +22,14 @@ public class SMSReceiver extends BroadcastReceiver {
 		if (action.equals(ACTION_SMS_RECEIVED)) {
 
 			String address = "", str = "";
+			int id = -1;
 			int contactId = -1;
 
 			SmsMessage[] msgs = getMessagesFromIntent(mIntent);
 			if (msgs != null) {
 				for (int i = 0; i < msgs.length; i++) {
+
+					id = msgs[i].getIndexOnIcc();
 					address = msgs[i].getOriginatingAddress();
 					// contactId = ContactsUtils.getContactId(mContext, address,
 					// "address");
@@ -41,11 +44,16 @@ public class SMSReceiver extends BroadcastReceiver {
 
 			// ---send a broadcast intent to update the SMS received in the
 			// activity---
-			Intent broadcastIntent = new Intent(RECEIVE_SMS_ACTION);
-			// broadcastIntent.setAction("SMS_RECEIVED_ACTION");
-			broadcastIntent.putExtra("sms", str);
+			Intent broadcastIntent = new Intent();
+			broadcastIntent.setAction(RECEIVE_SMS_ACTION);
+			broadcastIntent.putExtra("id", id);
+			broadcastIntent.putExtra("body", str);
 			broadcastIntent.putExtra("address", address);
 			context.sendBroadcast(broadcastIntent);
+
+			// _id, thread_id, address, person, date, protocol, read, status,
+			// type, reply_path_present, subject, body, service_center, locked
+
 		}
 
 	}

@@ -49,13 +49,14 @@ public final class CommonUtils {
 	 * Intent used to display a message in the screen.
 	 */
 	static final String DISPLAY_MESSAGE_ACTION = "me.lamson.thumbsy.android.DISPLAY_MESSAGE";
-	
+
 	static final String RECEIVE_SMS_ACTION = "me.lamson.thumbsy.android.RECEIVE_SMS";
 
 	/**
 	 * Intent's extra that contains the message to be displayed.
 	 */
 	static final String EXTRA_MESSAGE = "message";
+	static final String EXTRA_ADDRESS = "address";
 
 	static final Gson GSON = new Gson();
 
@@ -73,6 +74,8 @@ public final class CommonUtils {
 	static void displayMessage(Context context, String message) {
 		Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
 		intent.putExtra(EXTRA_MESSAGE, message);
+//		intent.putExtra(EXTRA_ADDRESS, "+12052085117");
+		intent.putExtra(EXTRA_ADDRESS, "+16823679168");
 		context.sendBroadcast(intent);
 	}
 }
