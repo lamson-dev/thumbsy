@@ -70,7 +70,7 @@ public class MessagesResource extends BaseResource {
 	}
 
 	@PUT
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response putMessage(String jsonData) {
 
 		// String jsonResponse = "";
@@ -88,7 +88,7 @@ public class MessagesResource extends BaseResource {
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response postMessage(String jsonData) {
 
 		// String jsonResponse = "";

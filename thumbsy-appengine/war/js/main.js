@@ -28,7 +28,6 @@ myApp.factory('Data', function () {
 
 // global scope of a ctrl
 
-
 function ConversationCtrl($scope, $http, Data) {
 
     // retrieve global data from different controllers
@@ -36,15 +35,13 @@ function ConversationCtrl($scope, $http, Data) {
 
     // array of messages for this conversation
     $scope.messages = [
-//        {content: 'blah blah', incoming: false},
-//        {content: 'umbala', incoming: true}
     ];
 
 
     $scope.addMessage = function (messageContent) {
 
-        convId = 1;
-        msgId = $scope.messages.length + 1;
+        var convId = 1;
+        var msgId = $scope.messages.length + 1;
 
 
         var jsonObj = {id: msgId, conversationId: convId, content: messageContent, incoming: false};
@@ -59,8 +56,9 @@ function ConversationCtrl($scope, $http, Data) {
                 // if didn't send, should delete
                 // and then set input textbox to the message
                 $scope.messages.push(jsonObj);
-                $("message-box").prop("scrollHeight");
                 $scope.messageContent = '';
+//                $("#message-box").animate({ scrollTop: $('#message-box')[0].scrollHeight}, 1000);
+                $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
 
             }).error(function (respData, respStatus, headers, config) {
                 $scope.respData = respData;
@@ -88,7 +86,8 @@ function ConversationCtrl($scope, $http, Data) {
                     var message = respData.message[i];
                     $scope.messages.push({content: message.content, incoming: message.incoming});
                 }
-                $("message-box").prop("scrollHeight");
+
+                $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
             }).error(function (data, status) {
 
                 $scope.status = status;
@@ -117,12 +116,15 @@ function ConversationCtrl($scope, $http, Data) {
         $scope.$on('$viewContentLoaded', $scope.fetchConversation(1));
     }
 
-    function AnotherCtrl($scope, Data) {
-        $scope.data = Data;
-    }
+}
+
+function ThumbsyCtrl($scope, Data) {
+    $scope.data = Data;
+
 }
 
 $(document).ready(function () {
+    $("#message-box").animate({ scrollTop: $('#message-box')[0].scrollHeight}, 1000);
 //    $("p").click(function() {
 //        $(this).hide();
 //    });

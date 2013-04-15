@@ -1,9 +1,13 @@
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
+import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.EXTRA_MESSAGE;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
+import static me.lamson.thumbsy.android.CommonUtils.URL_CHECK_CONVERSATION;
+import static me.lamson.thumbsy.android.CommonUtils.URL_POST_CONVERSATION;
+import static me.lamson.thumbsy.android.CommonUtils.URL_POST_MESSAGE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
@@ -37,13 +42,9 @@ import com.google.android.gms.plus.model.people.Person;
  * @author Son Nguyen
  * @version $Revision: 1.0 $
  */
-public class SetupPresenter {
+public class LoginPresenter {
 
-	private static final String TAG = SetupPresenter.class.getCanonicalName();
-
-	public static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/rest/messages";
-	public static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/conversations";
-	public static final String URL_CHECK_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/messages/conversation/";
+	private static final String TAG = LoginPresenter.class.getCanonicalName();
 
 	private final ISetupView mView;
 
@@ -54,18 +55,38 @@ public class SetupPresenter {
 
 	private boolean isExisted = false;
 
+	public LoginPresenter(ISetupView view) {
+		mView = view;
+	}
+
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+
+			// display message on screen
 			mView.getTvDisplay().append(newMessage + "\n");
 		}
 	};
 
-	public SetupPresenter(ISetupView view) {
-		mView = view;
-	}
+	private final BroadcastReceiver mHandleSMSReceiver = new BroadcastReceiver() {
 
+		// Retrieve SMS
+		public void onReceive(Context context, Intent intent) {
+			String sms = intent.getExtras().getString("sms");
+			String address = intent.getExtras().getString("address");
+
+			mView.getTvDisplay().append(sms + "\n" + address);
+		}
+
+	};
+
+	/**
+	 * initialize GCM, check whether device could register for GCM or not, if
+	 * good then register a messageReceiver
+	 * 
+	 * @param context
+	 */
 	public void initGCM(Context context) {
 		checkNotNull(SERVER_URL, "SERVER_URL");
 		checkNotNull(SENDER_ID, "SENDER_ID");
@@ -79,6 +100,9 @@ public class SetupPresenter {
 
 		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
+
+		context.registerReceiver(mHandleSMSReceiver, new IntentFilter(
+				RECEIVE_SMS_ACTION));
 	}
 
 	public void cleanUpGCM(Context context) {
@@ -124,8 +148,12 @@ public class SetupPresenter {
 
 	}
 
-	public void sendMessage() {
-		final Long conversationId = Long.valueOf(1);
+	/**
+	 * method to send a message to a conversation on server
+	 * 
+	 * @param conversationId
+	 */
+	public void sendMessage(final Long conversationId) {
 		conversationsOnServer.add(conversationId);
 
 		if (!conversationsOnServer.contains(conversationId)) {

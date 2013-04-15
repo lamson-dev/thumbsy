@@ -15,9 +15,6 @@
  */
 package me.lamson.thumbsy.android;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.content.Context;
 import android.content.Intent;
 
@@ -34,6 +31,10 @@ public final class CommonUtils {
 	 */
 	static final String SERVER_URL = "http://thumbsy-demo.appspot.com";
 
+	static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/rest/messages";
+	static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/conversations";
+	static final String URL_CHECK_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/messages/conversation/";
+
 	/**
 	 * Google API project id registered to use GCM.
 	 */
@@ -48,6 +49,8 @@ public final class CommonUtils {
 	 * Intent used to display a message in the screen.
 	 */
 	static final String DISPLAY_MESSAGE_ACTION = "me.lamson.thumbsy.android.DISPLAY_MESSAGE";
+	
+	static final String RECEIVE_SMS_ACTION = "me.lamson.thumbsy.android.RECEIVE_SMS";
 
 	/**
 	 * Intent's extra that contains the message to be displayed.

@@ -18,18 +18,18 @@ import com.google.android.gms.plus.model.people.Person;
  * Example of signing in a user with Google+, and how to make a call to a
  * Google+ API endpoint.
  */
-public class SetupActivity extends BaseActivity implements
+public class LoginActivity extends BaseActivity implements
 		View.OnClickListener, OnSignedInListener, ISetupView {
 
-	private static final String TAG = SetupActivity.class.getCanonicalName();
-	private final SetupPresenter mPresenter;
+	private static final String TAG = LoginActivity.class.getCanonicalName();
+	private final LoginPresenter mPresenter;
 
 	private TextView tvSignedInStatus, tvServerMessage, tvDeviceRegistered,
 			tvDisplay;
 	private EditText etxtClientMessage;
 
-	public SetupActivity() {
-		mPresenter = new SetupPresenter(this);
+	public LoginActivity() {
+		mPresenter = new LoginPresenter(this);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class SetupActivity extends BaseActivity implements
 
 			break;
 		case R.id.btn_send:
-			mPresenter.sendMessage();
+			mPresenter.sendMessage(Long.valueOf(1));
 			break;
 		}
 	}
@@ -128,7 +128,7 @@ public class SetupActivity extends BaseActivity implements
 		 * GCMRegistrar.unregister(this); return true;
 		 */
 		case R.id.options_clear:
-			tvDisplay.setText(null);
+			tvDisplay.setText("");
 			return true;
 		case R.id.options_exit:
 			finish();
@@ -161,7 +161,7 @@ public class SetupActivity extends BaseActivity implements
 	}
 
 	public TextView getTvDisplay() {
-		return tvServerMessage;
+		return tvDisplay;
 	}
 
 	public void setTvDisplay(TextView tvDisplay) {

@@ -42,7 +42,7 @@ public class LauncherActivity extends Activity {
 		// $codepro.audit.disable assignmentToNonFinalStatic
 
 		final Intent intent = new Intent(LauncherActivity.this,
-				SetupActivity.class);
+				LoginActivity.class);
 		startActivity(intent);
 		// Log.d(TAG, "open database");
 		Log.d(TAG, "finish launcher");
