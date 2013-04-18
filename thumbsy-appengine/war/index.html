@@ -19,11 +19,12 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <!--<link rel="stylesheet" href="css/bootstrap-responsive.min.css"/>-->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/sass/thumbsy.css">
 
     <script src="js/vendor/modernizr-2.6.2.min.js"></script>
-    <script src='/_ah/channel/jsapi'></script>
+    <!--<script src='/_ah/channel/jsapi'></script>-->
 
 </head>
 <body ng-controller="ThumbsyCtrl">
@@ -39,32 +40,58 @@
 
         <a class="brand" href="#">Thumbsy</a>
         <ul class="nav">
-            <li><a href="#">New Message</a></li>
+            <!--<li><a href="#">New Message</a></li>-->
             <li><a href="#">Contacts</a></li>
-            <li><a href="#">Settings</a></li>
+            <!--<li><a href="#">Settings</a></li>-->
         </ul>
 
-        <div id="signinButton" class="pull-right">
-            <span class="g-signin"
-                  data-scope="https://www.googleapis.com/auth/plus.login"
-                  data-clientid="1057121896515-f47mlri6s9201thcnrk42hbrgki8hhhs.apps.googleusercontent.com"
-                  data-redirecturi="postmessage"
-                  data-accesstype="offline"
-                  data-cookiepolicy="single_host_origin"
-                  data-callback="signInCallback">
-            </span>
+        <div id="login" class="pull-right">
+            <div id="gConnect">
+                <button class="g-signin"
+                        data-scope="https://www.googleapis.com/auth/plus.login"
+                        data-requestvisibleactions="http://schemas.google.com/AddActivity"
+                        data-clientId="1057121896515-f47mlri6s9201thcnrk42hbrgki8hhhs.apps.googleusercontent.com"
+                        data-callback="onSignInCallback"
+                        data-theme="dark"
+                        data-cookiepolicy="single_host_origin"
+                        data-width="wide">
+                </button>
+            </div>
+            <div id="profile">
+                <!--<a class="btn btn-primary" href="#"><i class="icon-user"></i> User</a>-->
+                <!--<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span-->
+                <!--class="icon-caret-down"></span></a>-->
+                <!--<ul class="dropdown-menu">-->
+                <!--<li><a href="#"><i class="icon-pencil"></i> Edit</a></li>-->
+                <!--<li><a href="#"><i class="icon-trash"></i> Delete</a></li>-->
+                <!--<li><a href="#"><i class="icon-ban-circle"></i> Ban</a></li>-->
+                <!--<li class="divider"></li>-->
+                <!--<li><a href="#"><i class="i"></i> Make admin</a></li>-->
+                <!--</ul>-->
+                <!--<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">-->
+                <!--Action-->
+                <!--<span class="caret"></span>-->
+                <!--</a>-->
+                <!--<ul class="dropdown-menu">-->
+                <!--&lt;!&ndash; dropdown menu links &ndash;&gt;-->
+                <!--</ul>-->
+            </div>
         </div>
-
         <form class="navbar-search">
             <input type="text" class="search-query" placeholder="Search">
         </form>
-
 
     </div>
 </div>
 
 
-<div class="container">
+<div id="main" class="container" style="display: none">
+    <a class="btn btn-small pull-right" href="#">
+        <i class="icon-cog"></i> Settings</a>
+    <a class="btn btn-small pull-right" href="#">
+        <i class="icon-edit"></i> New Message</a>
+    <i id="spinner" class="icon-spinner icon-spin icon-2x pull-right" style="display: none"></i>
+
     <div class="row">
 
         <!--sidebar content-->
@@ -74,8 +101,11 @@
 
         <!--main content-->
         <div id="main-content" class="span9">
-
             <div id="ConversationCtrl" class="conversation-box" ng-controller="ConversationCtrl">
+                <button ng-click="fetchConversation()"><a class="btn btn-small pull-right" href="#">
+                    <i class="icon-cog"></i> Settings</a></button>
+
+                <p class="address">{{message.address}}</p>
                 <!--<div style="padding: 10px;">-->
                 <!--<span>Number of Messages: {{getTotalMessages()}}</span>-->
                 <!--<button class="btn" ng-click="fetchConversation()" style="margin-left: 40px;">Fetch Conversation-->
@@ -92,7 +122,7 @@
                 </form>
                 <div id="message-box" class="messages-box">
                     <div ng-repeat="message in messages" ng-model="message.incoming">
-                        <p class="incoming-{{message.incoming}}">{{message.content}}
+                        <p class="incoming-{{message.incoming}}">{{message.body}}
                             <button class="btn btn-small incoming-{{message.incoming}}"
                                     ng-click="deleteMessage($index)"><i
                                     class="icon-trash"></i></button>
@@ -107,7 +137,31 @@
 
 
 </div>
+<div id="authOps" style="display:none">
+    <h2>User is now signed in to the app using Google+</h2>
 
+    <p>If the user chooses to disconnect, the app must delete all stored
+        information retrieved from Google for the given user.</p>
+    <button id="disconnect">Disconnect your Google account from this app</button>
+
+    <h2>User's profile information</h2>
+
+    <!--<div id="profile"></div>      -->
+
+    <h2>User's friends that are visible to this app</h2>
+
+    <div id="visiblePeople"></div>
+
+    <h2>Authentication Logs</h2>
+    <pre id="authResult"></pre>
+</div>
+<div id="loaderror">
+    This section will be hidden by JQuery. If you can see this message, you
+    may be viewing the file rather than running a web server.<br/>
+    The sample must be run from http or https. See instructions at
+    <a href="https://developers.google.com/+/quickstart/javascript">
+        https://developers.google.com/+/quickstart/javascript</a>.
+</div>
 <footer></footer>
 
 
@@ -116,11 +170,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
-<!--<script src="js/app.js"></script>-->
-<!--<script src="js/services.js"></script>-->
-<!--<script src="js/controllers.js"></script>-->
+<script src="js/app.js"></script>
+<script src="js/services.js"></script>
+<script src="js/controllers.js"></script>
 <!--<script src="js/filters.js"></script>-->
-<!--<script src="js/directives.js"></script>-->
+<script src="js/directives.js"></script>
 <!--<script type='text/javascript'>-->
 <!--function startApp() {-->
 <!--angular.bootstrap(document, ['photoHunt']);-->
@@ -133,46 +187,10 @@
         var po = document.createElement('script');
         po.type = 'text/javascript';
         po.async = true;
-        po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+        po.src = 'https://plus.google.com/js/client:plusone.js';
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(po, s);
     })();
-</script>
-<script type="text/javascript">
-    function signInCallback(authResult) {
-        if (authResult['code']) {
-
-// Hide the sign-in button now that the user is authorized, for example:
-            $('#signinButton').attr('style', 'display: none');
-
-// Send the code to the server
-            $.ajax({
-                type: 'POST',
-                url: 'plus.php?storeToken',
-                contentType: 'application/octet-stream; charset=utf-8',
-                success: function (result) {
-// Handle or verify the server response if necessary.
-
-// Prints the list of people that the user has allowed the app to know
-// to the console.
-                    console.log(result);
-                    if (result['profile'] && result['people']) {
-                        $('#results').html('Hello ' + result['profile']['displayName'] + '. You successfully made a server side call to people.get and people.list');
-                    } else {
-                        $('#results').html('Failed to make a server-side call. Check your configuration and console.');
-                    }
-                },
-                processData: false,
-                data: authResult['code']
-            });
-        } else if (authResult['error']) {
-// There was an error.
-// Possible error codes:
-//   "access_denied" - User denied access to your app
-//   "immediate_failed" - Could not automatially log in the user
-            console.log('There was an error: ' + authResult['error']);
-        }
-    }
 </script>
 
 <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->

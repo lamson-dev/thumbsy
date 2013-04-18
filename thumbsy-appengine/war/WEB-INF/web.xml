@@ -36,7 +36,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Thumbsy REST Service</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -85,31 +85,6 @@
     <servlet-mapping>
         <servlet-name>SendMessageServlet</servlet-name>
         <url-pattern>/send</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>MessageServlet</servlet-name>
-        <servlet-class>
-            me.lamson.thumbsy.appengine.MessageServlet
-        </servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>MessageServlet</servlet-name>
-        <url-pattern>/message</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>ConversationServlet</servlet-name>
-        <servlet-class>
-            me.lamson.thumbsy.appengine.ConversationServlet
-        </servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>ConversationServlet</servlet-name>
-        <url-pattern>/conversation</url-pattern>
     </servlet-mapping>
 
     <servlet>

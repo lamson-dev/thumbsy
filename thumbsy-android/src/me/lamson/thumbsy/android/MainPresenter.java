@@ -1,25 +1,21 @@
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
-import static me.lamson.thumbsy.android.CommonUtils.EXTRA_ADDRESS;
-import static me.lamson.thumbsy.android.CommonUtils.EXTRA_MESSAGE;
 import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
-import static me.lamson.thumbsy.android.CommonUtils.URL_CHECK_CONVERSATION;
-import static me.lamson.thumbsy.android.CommonUtils.URL_POST_CONVERSATION;
 import static me.lamson.thumbsy.android.CommonUtils.URL_POST_MESSAGE;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import me.lamson.thumbsy.models.Conversation;
-import me.lamson.thumbsy.models.Message;
+import me.lamson.thumbsy.models.Sms;
+import me.lamson.thumbsy.models.SmsThread;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -48,11 +44,8 @@ import com.google.android.gcm.GCMRegistrar;
 public class MainPresenter {
 
 	private static final String TAG = MainPresenter.class.getSimpleName();
-
 	private final IMainView mView;
-
 	private final Context mContext;
-
 	private final Set<Long> conversationsOnServer = new HashSet<Long>();
 
 	AsyncTask<Void, Void, Void> mRegisterTask, mSendMessageTask,
@@ -61,21 +54,22 @@ public class MainPresenter {
 	private boolean isExisted = false;
 
 	public MainPresenter(IMainView view, Context context) {
-
 		mView = view;
 		mContext = context;
 	}
 
-	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver mHandleGCMMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String message = intent.getExtras().getString(EXTRA_MESSAGE);
-			String address = intent.getExtras().getString(EXTRA_ADDRESS);
+			String msgBody = intent.getExtras().getString(Sms.PROPERTY_BODY);
+			String msgAddress = intent.getExtras().getString(
+					Sms.PROPERTY_ADDRESS);
 
 			// display message on screen
-			mView.getTvDisplay().append(message + "\n");
+			mView.getTvDisplay().append(msgBody + "\n");
 
-			sendSMS(address, message);
+			// send SMS
+			sendSMS(msgAddress, msgBody);
 		}
 	};
 
@@ -84,15 +78,19 @@ public class MainPresenter {
 		// Retrieve SMS
 		public void onReceive(Context context, Intent intent) {
 
-			int id = intent.getExtras().getInt("id");
-			String sms = intent.getExtras().getString("body");
-			String address = intent.getExtras().getString("address");
+			Long msgId = Long.valueOf(intent.getExtras()
+					.getInt(Sms.PROPERTY_ID));
+			String msgBody = intent.getExtras().getString(Sms.PROPERTY_BODY);
+			String msgAddress = intent.getExtras().getString(
+					Sms.PROPERTY_ADDRESS);
+			String msgDate = intent.getExtras().getString(Sms.PROPERTY_DATE);
 
-			mView.getTvDisplay().append(sms + "\n" + address);
+			Sms msg = new Sms(msgId, msgBody, msgAddress, true, msgDate);
 
-			if (address.equals("+12052085117"))
-				sendMessageToServer(Long.valueOf(id), sms + " from " + address,
-						address);
+			mView.getTvDisplay().append(msgBody + "\n" + msgAddress);
+
+			if (msgAddress.equals("+12052085117"))
+				sendMessageToServer(msg);
 		}
 
 	};
@@ -114,7 +112,7 @@ public class MainPresenter {
 		// while developing the app, then uncomment it when it's ready.
 		GCMRegistrar.checkManifest(context);
 
-		context.registerReceiver(mHandleMessageReceiver, new IntentFilter(
+		context.registerReceiver(mHandleGCMMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
 
 		context.registerReceiver(mHandleSMSReceiver, new IntentFilter(
@@ -125,7 +123,7 @@ public class MainPresenter {
 		if (mRegisterTask != null) {
 			mRegisterTask.cancel(true);
 		}
-		context.unregisterReceiver(mHandleMessageReceiver);
+		context.unregisterReceiver(mHandleGCMMessageReceiver);
 		context.unregisterReceiver(mHandleSMSReceiver);
 		GCMRegistrar.onDestroy(context);
 	}
@@ -165,53 +163,19 @@ public class MainPresenter {
 
 	}
 
-	/**
-	 * method to send a message to a conversation on server
-	 * 
-	 * @param conversationId
-	 */
-	public void sendMessageToServer(final Long conversationId,
-			final String content, final String address) {
-		conversationsOnServer.add(conversationId);
+	public void sendMessageToServer(final Sms msg) {
 
-		if (!conversationsOnServer.contains(conversationId)) {
-			// && !checkExistingConversation(conversationId)) {
+		// should I check for thread on server?
+		msg.setUserId(ThumbsyApp.getUser().getId());
+		final String smsData = CommonUtils.GSON.toJson(msg);
 
-			final String conversationData = createConversation(conversationId);
-
-			mSendConversationTask = new AsyncTask<Void, Void, Void>() {
-
-				@Override
-				protected Void doInBackground(Void... params) {
-					if (postJsonData(URL_POST_CONVERSATION, conversationData)) {
-						conversationsOnServer.add(conversationId);
-						Log.i(TAG, "conversation posted to " + URL_POST_MESSAGE);
-					}
-					return null;
-				}
-
-				@Override
-				protected void onPostExecute(Void result) {
-					mSendConversationTask = null;
-				}
-
-			};
-			mSendConversationTask.execute(null, null, null);
-		}
-
-		// final String messageData = createMessage(Long.valueOf(20),
-		// conversationId, mView.getEditClientMessage().getText()
-		// .toString());
-
-		final String messageData = createMessage(Long.valueOf(20),
-				conversationId, content);
+		Log.d(TAG, smsData);
 
 		mSendMessageTask = new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				if (postJsonData(URL_POST_MESSAGE, messageData)) {
-					Log.d(TAG, messageData);
+				if (postJsonData(URL_POST_MESSAGE, smsData)) {
 					Log.d(TAG, "message posted to " + URL_POST_MESSAGE);
 				}
 				return null;
@@ -230,7 +194,7 @@ public class MainPresenter {
 	private static String DELIVERED = "SMS_DELIVERED";
 	private static int MAX_SMS_MESSAGE_LENGTH = 160;
 
-	public void sendSMS(String phoneNumber, String message) {
+	private void sendSMS(String phoneNumber, String msgBody) {
 
 		PendingIntent piSent = PendingIntent.getBroadcast(mView.getContext(),
 				0, new Intent(SENT), 0);
@@ -290,60 +254,61 @@ public class MainPresenter {
 			}
 		}, new IntentFilter(DELIVERED));
 
+		// TODO: after sending SMS, should write to inbox as well
 		SmsManager smsManager = SmsManager.getDefault();
 
-		int length = message.length();
+		int length = msgBody.length();
 		if (length > MAX_SMS_MESSAGE_LENGTH) {
-			ArrayList<String> messagelist = smsManager.divideMessage(message);
+			ArrayList<String> messagelist = smsManager.divideMessage(msgBody);
 			smsManager.sendMultipartTextMessage(phoneNumber, null, messagelist,
 					null, null);
 		} else
-			smsManager.sendTextMessage(phoneNumber, null, message, piSent,
+			smsManager.sendTextMessage(phoneNumber, null, msgBody, piSent,
 					piDelivered);
 	}
 
-	public boolean checkExistingConversation(final Long id) {
-
-		mSendConversationTask = new AsyncTask<Void, Void, Void>() {
-
-			@Override
-			protected Void doInBackground(Void... params) {
-				HttpClient client = new DefaultHttpClient();
-				HttpConnectionParams.setConnectionTimeout(client.getParams(),
-						10000); // Timeout
-				HttpResponse response;
-
-				try {
-					HttpGet get = new HttpGet(URL_CHECK_CONVERSATION
-							+ String.valueOf(id));
-					response = client.execute(get);
-
-					/* Checking response */
-					if (response != null) {
-						Log.d(TAG, EntityUtils.toString(response.getEntity()));
-					}
-
-					isExisted = (response.getStatusLine().getStatusCode() == 200);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					Log.e(TAG, "Cannot Estabilish Connection");
-				}
-				isExisted = false;
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				mSendConversationTask = null;
-			}
-
-		};
-		mSendConversationTask.execute(null, null, null);
-
-		return isExisted;
-
-	}
+	// public boolean checkExistingConversation(final Long id) {
+	//
+	// mSendConversationTask = new AsyncTask<Void, Void, Void>() {
+	//
+	// @Override
+	// protected Void doInBackground(Void... params) {
+	// HttpClient client = new DefaultHttpClient();
+	// HttpConnectionParams.setConnectionTimeout(client.getParams(),
+	// 10000); // Timeout
+	// HttpResponse response;
+	//
+	// try {
+	// HttpGet get = new HttpGet(URL_CHECK_CONVERSATION
+	// + String.valueOf(id));
+	// response = client.execute(get);
+	//
+	// /* Checking response */
+	// if (response != null) {
+	// Log.d(TAG, EntityUtils.toString(response.getEntity()));
+	// }
+	//
+	// isExisted = (response.getStatusLine().getStatusCode() == 200);
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// Log.e(TAG, "Cannot Estabilish Connection");
+	// }
+	// isExisted = false;
+	// return null;
+	// }
+	//
+	// @Override
+	// protected void onPostExecute(Void result) {
+	// mSendConversationTask = null;
+	// }
+	//
+	// };
+	// mSendConversationTask.execute(null, null, null);
+	//
+	// return isExisted;
+	//
+	// }
 
 	public void registerDevice(final Context context) {
 
@@ -399,16 +364,16 @@ public class MainPresenter {
 	}
 
 	private String createConversation(Long id) {
-		Conversation c = new Conversation(id, ThumbsyApp.getUser().getId(),
+		SmsThread c = new SmsThread(id, ThumbsyApp.getUser().getId(),
 				"no content");
 		return CommonUtils.GSON.toJson(c);
 	}
 
-	private String createMessage(Long id, Long conversationId, String message) {
-		Message m = new Message(id, conversationId, message, true);
-
-		Log.d(TAG, CommonUtils.GSON.toJson(m));
-		return CommonUtils.GSON.toJson(m);
+	private String createMessage(Long msgId, String msgBody, String msgAddress) {
+		Sms sms = new Sms(msgId, msgBody, msgAddress, true,
+				String.valueOf(new Date().toString()));
+		sms.setUserId(ThumbsyApp.getUser().getId());
+		return CommonUtils.GSON.toJson(sms);
 	}
 
 	private void checkNotNull(Object reference, String name) {

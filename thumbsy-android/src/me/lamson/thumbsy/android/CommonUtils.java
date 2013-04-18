@@ -31,9 +31,8 @@ public final class CommonUtils {
 	 */
 	static final String SERVER_URL = "http://thumbsy-demo.appspot.com";
 
-	static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/rest/messages";
-	static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/conversations";
-	static final String URL_CHECK_CONVERSATION = "http://thumbsy-demo.appspot.com/rest/messages/conversation/";
+	static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/api/messages";
+	static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/api/conversations";
 
 	/**
 	 * Google API project id registered to use GCM.
@@ -74,8 +73,17 @@ public final class CommonUtils {
 	static void displayMessage(Context context, String message) {
 		Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
 		intent.putExtra(EXTRA_MESSAGE, message);
-//		intent.putExtra(EXTRA_ADDRESS, "+12052085117");
-		intent.putExtra(EXTRA_ADDRESS, "+16823679168");
+		// intent.putExtra(EXTRA_ADDRESS, "+12052085117");
+		// intent.putExtra(EXTRA_ADDRESS, "+16823679168");
+		intent.putExtra(EXTRA_ADDRESS, "+12152067916");
+		context.sendBroadcast(intent);
+	}
+
+	static void broadcastMsgFromGCM(Context context, String message,
+			String address) {
+		Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
+		intent.putExtra(EXTRA_MESSAGE, message);
+		intent.putExtra(EXTRA_ADDRESS, address);
 		context.sendBroadcast(intent);
 	}
 }

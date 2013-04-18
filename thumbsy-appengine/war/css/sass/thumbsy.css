@@ -49,9 +49,11 @@ html, body {
   background-color: snow;
   text-align: right; }
 
-#signinButton {
+#login {
   margin-top: 4px;
   height: 30px; }
+  #login img {
+    height: 30px; }
 
 p {
   color: #777777;

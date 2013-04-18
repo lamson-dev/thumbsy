@@ -47,7 +47,7 @@ abstract class BaseServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 		resp.setContentType("application/json; charset=utf-8");
-		resp.setHeader("Cache-Control", "no-cache");
+//		resp.setHeader("Cache-Control", "no-cache");
 		if (DEBUG) {
 			doPost(req, resp);
 		} else {

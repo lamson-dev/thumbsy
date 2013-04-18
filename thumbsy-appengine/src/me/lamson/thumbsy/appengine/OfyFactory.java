@@ -6,8 +6,8 @@ package me.lamson.thumbsy.appengine;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import me.lamson.thumbsy.models.Conversation;
-import me.lamson.thumbsy.models.Message;
+import me.lamson.thumbsy.models.Sms;
+import me.lamson.thumbsy.models.SmsThread;
 
 import com.google.inject.Injector;
 import com.googlecode.objectify.ObjectifyFactory;
@@ -29,8 +29,8 @@ public class OfyFactory extends ObjectifyFactory {
 	public OfyFactory() {
 		// long time = System.currentTimeMillis();
 
-		this.register(Conversation.class);
-		this.register(Message.class);
+		this.register(SmsThread.class);
+		this.register(Sms.class);
 		// this.register(EmailLookup.class);
 
 		// long millis = System.currentTimeMillis() - time;

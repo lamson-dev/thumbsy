@@ -15,20 +15,16 @@
 
 'use strict';
 
-var photoHunt = angular.module('photoHunt',
-    ['photoHunt.services', 'photoHunt.directives', 'photoHunt.filters'],
-    function ($locationProvider) {
-        $locationProvider.html5Mode(true);
-    }
-);
+var DEBUG = true;
+var DEBUG_WEB = true;
 
-//var myApp = angular.module('photoHunt',
-//    ['photoHunt.services', 'photoHunt.directives', 'photoHunt.filters'],
-//    function ($locationProvider) {
-//        $locationProvider.html5Mode(true);
-//    }
-//);
-//
-//myApp.factory('Data', function () {
-//    return {message: "I'm data from a service"};
-//});
+var MAX_CHAR_PER_TEXT = 500;
+
+var myApp = angular.module('myApp', []);
+var postMessageUrl = "http://thumbsy-demo.appspot.com/sendAll";
+var fetchConversationUrl = "http://thumbsy-demo.appspot.com/rest/messages/conversation/";
+
+if (DEBUG) {
+    postMessageUrl = "http://localhost:8888/sendAll";
+    fetchConversationUrl = "http://localhost:8888/api/messages/conversation/";
+}

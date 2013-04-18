@@ -23,10 +23,8 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import me.lamson.thumbsy.models.Conversation;
-import me.lamson.thumbsy.models.Message;
-
-import com.googlecode.objectify.Key;
+import me.lamson.thumbsy.models.Sms;
+import me.lamson.thumbsy.models.SmsThread;
 
 /**
  * Servlet that adds display number of devices and button to send a message.
@@ -39,8 +37,8 @@ public class TestServlet extends BaseServlet {
 
 	static final String ATTRIBUTE_STATUS = "status";
 
-	Conversation c;
-	Message m;
+	SmsThread c;
+	Sms m;
 	String json;
 	PrintWriter writer;
 
@@ -51,7 +49,8 @@ public class TestServlet extends BaseServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
-		c = new Conversation(Long.valueOf(1), "206-432-5142", "Son");
+		c = new SmsThread(Long.valueOf(1), "118226533603167233005",
+				"+12052085117");
 		json = GSON.toJson(c);
 
 		writer = resp.getWriter();
@@ -65,7 +64,7 @@ public class TestServlet extends BaseServlet {
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		resp.setContentType("application/json");
-		m = new Message(Long.valueOf(1), c.getId(), "message content", false);
+		m = new Sms(Long.valueOf(1), "hello", "+12052085117", false);
 		json = GSON.toJson(m);
 		writer = resp.getWriter();
 		writer.print(json);

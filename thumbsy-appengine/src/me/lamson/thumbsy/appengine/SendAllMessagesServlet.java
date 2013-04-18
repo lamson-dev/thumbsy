@@ -18,19 +18,16 @@ package me.lamson.thumbsy.appengine;
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withUrl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import me.lamson.thumbsy.models.Message;
+import me.lamson.thumbsy.models.Sms;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
 /**
  * Servlet that adds a new message to all registered devices.
@@ -53,15 +50,33 @@ public class SendAllMessagesServlet extends BaseServlet {
 		} else {
 
 			String jsonData = readJsonRequest(req);
-			Message msg = GSON.fromJson(jsonData, Message.class);
-			String messageContent = msg.getContent();
+			Sms msg = GSON.fromJson(jsonData, Sms.class);
+			String msgBody = msg.getBody();
+			String msgAddress = msg.getAddress();
+			String msgUserId = msg.getUserId();
+			String deviceRegId = DatastoreGCM.getRegIdByUserId(msgUserId);
+			Long msgThreadId = msg.getThreadId();
 
 			// NOTE: when succeed sending message, save to datastore
 			// should complete by android client, when message sent,
 			// android post, then real time API fetch
-			MessageDao.createMessage(msg); // for now insert to datastore
+
+			// check for conversation existed or not
+			if (SmsThreadDao.getThreadById(msgThreadId) == null) {
+				SmsThreadDao.createAndStoreThread(msgThreadId, msgUserId,
+						msgAddress);
+			}
+
+			SmsDao.storeSms(msg);
 
 			Queue queue = QueueFactory.getQueue("gcm");
+			queue.add(withUrl("/send")
+					.param(SendMessageServlet.PARAMETER_DEVICE, deviceRegId)
+					.param(SendMessageServlet.PARAMETER_MESSAGE, msgBody)
+					.param(SendMessageServlet.PARAMETER_ADDRESS, msgAddress));
+			status = "Single message queued for registration id: \n"
+					+ deviceRegId + "\nMessage Content: " + msgBody;
+
 			// NOTE: check below is for demonstration purposes; a real
 			// application
 			// could always send a multicast, even for just one recipient
@@ -73,37 +88,38 @@ public class SendAllMessagesServlet extends BaseServlet {
 			// SendMessageServlet.PARAMETER_MESSAGE, messageContent));
 			// status = "Single message queued for registration id: \n"
 			// + device + "\nMessage Content: " + messageContent;
+			// }
 			// } else {
 			// send a multicast message using JSON
 			// must split in chunks of 1000 devices (GCM limit)
-			int total = devices.size();
-			List<String> partialDevices = new ArrayList<String>(total);
-			int counter = 0;
-			int tasks = 0;
-			for (String device : devices) {
-				counter++;
-				partialDevices.add(device);
-				int partialSize = partialDevices.size();
-				if (partialSize == DatastoreGCM.MULTICAST_SIZE
-						|| counter == total) {
-					String multicastKey = DatastoreGCM
-							.createMulticast(partialDevices);
-					logger.fine("Queuing " + partialSize
-							+ " devices on multicast " + multicastKey);
-					TaskOptions taskOptions = TaskOptions.Builder
-							.withUrl("/send")
-							.param(SendMessageServlet.PARAMETER_MULTICAST,
-									multicastKey)
-							.param(SendMessageServlet.PARAMETER_MESSAGE,
-									messageContent).method(Method.POST);
-					queue.add(taskOptions);
-					partialDevices.clear();
-					tasks++;
-				}
-				// }
-				status = "Queued tasks to send " + tasks
-						+ " multicast messages to " + total + " devices";
-			}
+			// int total = devices.size();
+			// List<String> partialDevices = new ArrayList<String>(total);
+			// int counter = 0;
+			// int tasks = 0;
+			// for (String device : devices) {
+			// counter++;
+			// partialDevices.add(device);
+			// int partialSize = partialDevices.size();
+			// if (partialSize == DatastoreGCM.MULTICAST_SIZE
+			// || counter == total) {
+			// String multicastKey = DatastoreGCM
+			// .createMulticast(partialDevices);
+			// logger.fine("Queuing " + partialSize
+			// + " devices on multicast " + multicastKey);
+			// TaskOptions taskOptions = TaskOptions.Builder
+			// .withUrl("/send")
+			// .param(SendMessageServlet.PARAMETER_MULTICAST,
+			// multicastKey)
+			// .param(SendMessageServlet.PARAMETER_MESSAGE,
+			// messageContent).method(Method.POST);
+			// queue.add(taskOptions);
+			// partialDevices.clear();
+			// tasks++;
+			// }
+			// // }
+			// status = "Queued tasks to send " + tasks
+			// + " multicast messages to " + total + " devices";
+			// }
 		}
 		// req.setAttribute(HomeServlet.ATTRIBUTE_STATUS, status.toString());
 		// getServletContext().getRequestDispatcher("/home").forward(req, resp);

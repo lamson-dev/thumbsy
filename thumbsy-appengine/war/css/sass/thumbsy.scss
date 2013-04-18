@@ -91,9 +91,17 @@ html, body {
   text-align: right;
 }
 
-#signinButton {
+#login {
   margin-top: 4px;
   height: 30px;
+  img {
+    height: 30px;
+  }
+}
+
+#profile {
+  //display: inline;
+
 }
 
 p {

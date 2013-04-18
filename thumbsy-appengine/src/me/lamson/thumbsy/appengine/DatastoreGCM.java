@@ -15,6 +15,11 @@
  */
 package me.lamson.thumbsy.appengine;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -27,11 +32,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Transaction;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Logger;
-
 /**
  * Simple implementation of a data store using standard Java collections.
  * <p>
@@ -43,7 +43,7 @@ public final class DatastoreGCM {
 	static final int MULTICAST_SIZE = 1000;
 	private static final String DEVICE_TYPE = "Device";
 	private static final String DEVICE_REG_ID_PROPERTY = "regId";
-	private static final String DEVICE_USER_ID_PROERTY = "userId";
+	private static final String DEVICE_USER_ID_PROPERTY = "userId";
 
 	private static final String MULTICAST_TYPE = "Multicast";
 	private static final String MULTICAST_REG_IDS_PROPERTY = "regIds";
@@ -76,7 +76,7 @@ public final class DatastoreGCM {
 				return;
 			}
 			entity = new Entity(DEVICE_TYPE);
-			entity.setProperty(DEVICE_USER_ID_PROERTY, userId);
+			entity.setProperty(DEVICE_USER_ID_PROPERTY, userId);
 			entity.setProperty(DEVICE_REG_ID_PROPERTY, regId);
 			datastore.put(entity);
 			txn.commit();
@@ -194,6 +194,25 @@ public final class DatastoreGCM {
 					+ ": " + entities);
 		}
 		return entity;
+	}
+
+	public static String getRegIdByUserId(String userId) {
+		Query query = new Query(DEVICE_TYPE).addFilter(DEVICE_USER_ID_PROPERTY,
+				FilterOperator.EQUAL, userId);
+		PreparedQuery preparedQuery = datastore.prepare(query);
+		List<Entity> entities = preparedQuery.asList(DEFAULT_FETCH_OPTIONS);
+		Entity entity = null;
+		if (!entities.isEmpty()) {
+			entity = entities.get(0);
+		}
+		int size = entities.size();
+		if (size > 0) {
+			logger.severe("Found " + size + " entities for regId " + userId
+					+ ": " + entities);
+		}
+		if (entity != null)
+			return (String) entity.getProperty(DEVICE_REG_ID_PROPERTY);
+		return null;
 	}
 
 	/**

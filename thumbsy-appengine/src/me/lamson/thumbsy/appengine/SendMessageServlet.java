@@ -46,6 +46,7 @@ public class SendMessageServlet extends BaseServlet {
 	static final String PARAMETER_DEVICE = "device";
 	static final String PARAMETER_MULTICAST = "multicastKey";
 	static final String PARAMETER_MESSAGE = "new-message";
+	static final String PARAMETER_ADDRESS = "address";
 
 	private Sender sender;
 
@@ -99,8 +100,9 @@ public class SendMessageServlet extends BaseServlet {
 		}
 		String regId = req.getParameter(PARAMETER_DEVICE);
 		String message = req.getParameter(PARAMETER_MESSAGE);
+		String address = req.getParameter(PARAMETER_ADDRESS);
 		if (regId != null) {
-			sendSingleMessage(regId, resp, message);
+			sendSingleMessage(regId, resp, message, address);
 			return;
 		}
 		String multicastKey = req.getParameter(PARAMETER_MULTICAST);
@@ -115,12 +117,12 @@ public class SendMessageServlet extends BaseServlet {
 	}
 
 	private void sendSingleMessage(String regId, HttpServletResponse resp,
-			String newMessage) {
+			String newMessage, String address) {
 		logger.info("Sending message to device " + regId);
 
 		// NOTE: modified this
 		Message message = new Message.Builder().addData("content", newMessage)
-				.build();
+				.addData("address", address).build();
 
 		Result result;
 		try {

@@ -1,5 +1,6 @@
 package me.lamson.thumbsy.appengine.resources;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -15,8 +16,11 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import me.lamson.thumbsy.appengine.MessageDao;
-import me.lamson.thumbsy.models.Message;
+import me.lamson.thumbsy.appengine.DatastoreGCM;
+import me.lamson.thumbsy.appengine.SmsDao;
+import me.lamson.thumbsy.appengine.SmsThreadDao;
+import me.lamson.thumbsy.models.Sms;
+import me.lamson.thumbsy.models.SmsThread;
 
 import com.google.gson.Gson;
 
@@ -28,7 +32,7 @@ import com.google.gson.Gson;
  */
 // Will map the resource to the URL brands
 @Path("/messages")
-public class MessagesResource extends BaseResource {
+public class SmsResource extends BaseResource {
 
 	// Allows to insert contextual objects into the class,
 	// e.g. ServletContext, Request, Response, UriInfo
@@ -41,9 +45,9 @@ public class MessagesResource extends BaseResource {
 	@Path("{messageId : \\d+}")
 	// support digits only
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Message getMessage(@PathParam("messageId") String messageId) {
+	public Sms getSms(@PathParam("messageId") String messageId) {
 
-		Message message = MessageDao.getMessageById(Long.valueOf(messageId));
+		Sms message = SmsDao.getSmsById(Long.valueOf(messageId));
 		if (message == null) {
 			throw new RuntimeException("Get: Todo with " + messageId
 					+ " not found");
@@ -54,10 +58,24 @@ public class MessagesResource extends BaseResource {
 	@GET
 	@Path("conversation/{conversationId : \\d+}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public List<Message> getMessagesByConversationId(
+	public List<Sms> getSmssByConversationId(
 			@PathParam("conversationId") String conversationId) {
-		return MessageDao.getMessagesByConversationId(Long
-				.valueOf(conversationId));
+		return SmsDao.getSmsByThreadId(Long.valueOf(conversationId));
+	}
+
+	@GET
+	@Path("conversations/{userId}")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public List<SmsThread> getThreadsByUserId(@PathParam("userId") String userId) {
+		return SmsThreadDao.getThreadsByUserId(userId);
+	}
+
+	@GET
+	@Path("conversation/{userId}/{address}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public List<Sms> getSmssByAddress(@PathParam("userId") String userId,
+			@PathParam("address") String address) {
+		return SmsDao.getSmsByThreadKey(userId, address);
 	}
 
 	@GET
@@ -69,17 +87,44 @@ public class MessagesResource extends BaseResource {
 		return null;
 	}
 
-	@PUT
+	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response putMessage(String jsonData) {
+	public Response postSms(String jsonData) {
 
-		// String jsonResponse = "";
+		String jsonResponse = "";
 		try {
-			Message msg = new Gson().fromJson(jsonData, Message.class);
-			MessageDao.createMessage(msg);
+			Sms msg = new Gson().fromJson(jsonData, Sms.class);
+
+			// authenticate by checking userId register
+			if (DatastoreGCM.getRegIdByUserId(msg.getUserId()) == null) {
+				jsonResponse = "you haven't register yet!";
+				return Response.status(Response.Status.NOT_ACCEPTABLE)
+						.entity(jsonResponse).build();
+			}
+
+			// check if conversation is already on server
+			List<SmsThread> threads = SmsThreadDao.getThreadsByUserId(msg
+					.getUserId());
+			boolean isThreadOnServer = false;
+
+			if (threads != null)
+				for (Iterator<SmsThread> i = threads.iterator(); i.hasNext();) {
+					SmsThread thread = i.next();
+					if (thread.getAddress().equals(msg.getAddress())) {
+						isThreadOnServer = true;
+						break;
+					}
+				}
+
+			if (!isThreadOnServer)
+				SmsThreadDao.createAndStoreThread(null, msg.getUserId(),
+						msg.getAddress());
+
+			SmsDao.storeSms(msg);
 			return Response.status(Response.Status.CREATED).build();
 
 		} catch (Exception e) {
+			logger.warning(e.getMessage());
 			// return Response.status(Response.Status.NOT_ACCEPTABLE)
 			// .entity(jsonResponse).build();
 			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
@@ -87,14 +132,14 @@ public class MessagesResource extends BaseResource {
 		}
 	}
 
-	@POST
+	@PUT
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response postMessage(String jsonData) {
+	public Response putSms(String jsonData) {
 
 		// String jsonResponse = "";
 		try {
-			Message msg = new Gson().fromJson(jsonData, Message.class);
-			MessageDao.createMessage(msg);
+			Sms msg = new Gson().fromJson(jsonData, Sms.class);
+			SmsDao.storeSms(msg);
 			return Response.status(Response.Status.CREATED).build();
 
 		} catch (Exception e) {
@@ -195,14 +240,14 @@ public class MessagesResource extends BaseResource {
 	// * brand and passed to BrandResource
 	// */
 	// @Path("{id}")
-	// public MessageResource getBrand(@PathParam("id") int id,
+	// public SmsResource getBrand(@PathParam("id") int id,
 	// @QueryParam("key") String key) {
 	// if (key == null || !key.equals(SECRET_KEY)) {
 	// ApiResponse result = new ApiResponse();
 	// result.setResponse(ResStatusMsg.unauthorized());
 	// throw new BrandNotFoundException(Tools.gson.toJson(result));
 	// }
-	// return new MessageResource(uriInfo, request, id);
+	// return new SmsResource(uriInfo, request, id);
 	//
 	// }
 }

@@ -1,6 +1,9 @@
 package me.lamson.thumbsy.android;
 
+import java.util.Date;
+
 import me.lamson.thumbsy.android.PlusClientFragment.OnSignedInListener;
+import me.lamson.thumbsy.models.Sms;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -72,8 +75,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 			backToSignInActivity();
 			break;
 		case R.id.btn_send:
-			mPresenter.sendMessageToServer(Long.valueOf(1), etClientMessage
-					.getText().toString(), "android client");
+			mPresenter.sendMessageToServer(new Sms(Long.valueOf(1),
+					"hello from Android", "+12052085117", true, new Date()
+							.toString()));
+			this.etClientMessage.setText(null);
 			break;
 		}
 	}

@@ -1,6 +1,7 @@
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
+import me.lamson.thumbsy.models.Sms;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,34 +22,39 @@ public class SMSReceiver extends BroadcastReceiver {
 
 		if (action.equals(ACTION_SMS_RECEIVED)) {
 
-			String address = "", str = "";
-			int id = -1;
+			String msgAddress = "";
+			String msgBody = "";
+			String msgDate = "";
+
+			int msgId = -1;
 			int contactId = -1;
 
 			SmsMessage[] msgs = getMessagesFromIntent(mIntent);
 			if (msgs != null) {
 				for (int i = 0; i < msgs.length; i++) {
 
-					id = msgs[i].getIndexOnIcc();
-					address = msgs[i].getOriginatingAddress();
+					msgId = msgs[i].getIndexOnIcc();
+					msgAddress = msgs[i].getOriginatingAddress();
+					msgDate = String.valueOf(msgs[i].getTimestampMillis());
 					// contactId = ContactsUtils.getContactId(mContext, address,
 					// "address");
-					str += msgs[i].getMessageBody().toString();
-					str += "\n";
+					msgBody += msgs[i].getMessageBody().toString();
+					msgBody += "\n";
 				}
 			}
 
 			if (contactId != -1) {
-				showNotification(contactId, str);
+				showNotification(contactId, msgBody);
 			}
 
 			// ---send a broadcast intent to update the SMS received in the
 			// activity---
 			Intent broadcastIntent = new Intent();
 			broadcastIntent.setAction(RECEIVE_SMS_ACTION);
-			broadcastIntent.putExtra("id", id);
-			broadcastIntent.putExtra("body", str);
-			broadcastIntent.putExtra("address", address);
+			broadcastIntent.putExtra(Sms.PROPERTY_ID, msgId);
+			broadcastIntent.putExtra(Sms.PROPERTY_BODY, msgBody);
+			broadcastIntent.putExtra(Sms.PROPERTY_ADDRESS, msgAddress);
+			broadcastIntent.putExtra(Sms.PROPERTY_DATE, msgDate);
 			context.sendBroadcast(broadcastIntent);
 
 			// _id, thread_id, address, person, date, protocol, read, status,

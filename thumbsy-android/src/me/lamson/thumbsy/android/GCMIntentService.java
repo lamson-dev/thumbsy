@@ -15,8 +15,10 @@
  */
 package me.lamson.thumbsy.android;
 
-import static me.lamson.thumbsy.android.CommonUtils.displayMessage;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
+import static me.lamson.thumbsy.android.CommonUtils.broadcastMsgFromGCM;
+import static me.lamson.thumbsy.android.CommonUtils.displayMessage;
+import me.lamson.thumbsy.models.Sms;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -60,14 +62,21 @@ public class GCMIntentService extends GCMBaseIntentService {
 		}
 	}
 
+	/**
+	 * On message received from GCM with an intent , get message details from
+	 * this intent then broadcast it for MainPresenter to receive
+	 */
 	@Override
 	protected void onMessage(Context context, Intent intent) {
 		Log.i(TAG, "Received message");
 		// String message = getString(R.string.gcm_message);
-		String message = (String) intent.getExtras().get("content");
-		displayMessage(context, message);
+		String msgBody = (String) intent.getExtras().get(Sms.PROPERTY_BODY);
+		String msgAddress = (String) intent.getExtras().get(
+				Sms.PROPERTY_ADDRESS);
+
+		broadcastMsgFromGCM(context, msgBody, msgAddress);
 		// notifies user
-		generateNotification(context, message);
+		generateNotification(context, msgBody);
 	}
 
 	@Override
