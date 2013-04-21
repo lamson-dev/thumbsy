@@ -92,7 +92,7 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
                 // confirm when received notice from android client
                 // if didn't send, should delete
                 // and then set input textbox to the message
-                $scope.messages.unshift(jsonObj);
+                $scope.messages.push(jsonObj);
                 $scope.messageBody = '';
                 $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
 
@@ -174,11 +174,59 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
         $scope.messages.splice(index, 1);
     };
 
-//    if (!DEBUG_WEB) {
-//        // fetch conversation on page load
-//        $scope.$on('$viewContentLoaded', $scope.fetchConversation(1));
-//    }
 
+    $scope.onSocketMessage = function (message) {
+
+        var messageXML = ((new DOMParser()).parseFromString(message.data, "text/xml"));
+        var messageType = messageXML.documentElement.getElementsByTagName("type")[0].firstChild.nodeValue;
+        if (messageType == "updateFriendList") {
+//            addToFriends(messageXML.documentElement.getElementsByTagName("message")[0].firstChild.nodeValue);
+        } else if (messageType == "updateChatBox") {
+            var address = messageXML.documentElement.getElementsByTagName("address")[0].firstChild.nodeValue;
+
+            if (address == $scope.currentConversationAddress)
+                $scope.fetchCurrentConversation();
+            else
+                alert('you got new message from: ' + address);
+        }
+    };
+
+    $scope.onSocketError = function (error) {
+        alert("Error is <br/>" + error.description + " <br /> and HTML code" + error.code);
+    };
+
+    $scope.onSocketOpen = function () {
+        // socket opened
+        console.log('onSocketOpen: ', true);
+    };
+
+    $scope.onSocketClose = function () {
+        alert("Socket Connection closed");
+    };
+
+    $scope.openChannel = function (token) {
+        var channel = new goog.appengine.Channel(token);
+        var socket = channel.open();
+        socket.onopen = $scope.onSocketOpen;
+        socket.onmessage = $scope.onSocketMessage;
+        socket.onerror = $scope.onSocketError;
+        socket.onclose = $scope.onSocketClose;
+    };
+
+    $scope.requestChannelToken = function (userId) {
+        var getTokenURI = '/gettoken?googleUserId=' + userId;
+        var httpRequest = ThumbsyApi.makeRequestToken(getTokenURI, true);
+
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === 4) {
+                if (httpRequest.status === 200) {
+                    $scope.openChannel(httpRequest.responseText);
+                } else {
+                    alert('There was a problem with the request.');
+                }
+            }
+        }
+    };
 
     /**
      * Calls the OAuth2 endpoint to disconnect the app for the user.
@@ -289,6 +337,8 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
                 request.execute(function (resp) {
                     $scope.$apply(function () {
                         $scope.signedIn(resp);
+
+                        $scope.requestChannelToken($scope.userProfile.id);
 
                         $scope.enjoyApp();
                     });

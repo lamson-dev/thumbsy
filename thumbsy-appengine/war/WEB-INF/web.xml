@@ -88,6 +88,30 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>TokenServlet</servlet-name>
+        <servlet-class>
+            me.lamson.thumbsy.appengine.TokenServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TokenServlet</servlet-name>
+        <url-pattern>/gettoken</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>NotifyServlet</servlet-name>
+        <servlet-class>
+            me.lamson.thumbsy.appengine.NotifyServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>NotifyServlet</servlet-name>
+        <url-pattern>/notify</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>TestServlet</servlet-name>
         <servlet-class>
             me.lamson.thumbsy.appengine.TestServlet

@@ -15,17 +15,17 @@
  */
 package me.lamson.thumbsy.appengine;
 
+import java.util.logging.Logger;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-
-import java.util.logging.Logger;
-
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
 /**
  * Context initializer that loads the API key from the App Engine datastore.

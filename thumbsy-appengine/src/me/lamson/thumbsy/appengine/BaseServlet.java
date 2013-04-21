@@ -34,85 +34,85 @@ import com.google.gson.Gson;
 @SuppressWarnings("serial")
 abstract class BaseServlet extends HttpServlet {
 
-	// change to true to allow GET calls
-	static final boolean DEBUG = true;
+    // change to true to allow GET calls
+    static final boolean DEBUG = true;
 
-	protected final Logger logger = Logger.getLogger(getClass().getName());
-	protected final Gson GSON = new Gson();
+    protected final Logger logger = Logger.getLogger(getClass().getName());
+    protected final Gson GSON = new Gson();
 
-	protected BufferedReader reader = null;
-	protected StringBuffer buffer = null;
+    protected BufferedReader reader = null;
+    protected StringBuffer buffer = null;
 
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException, ServletException {
-		resp.setContentType("application/json; charset=utf-8");
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, ServletException {
+        resp.setContentType("application/json; charset=utf-8");
 //		resp.setHeader("Cache-Control", "no-cache");
-		if (DEBUG) {
-			doPost(req, resp);
-		} else {
-			super.doGet(req, resp);
-		}
-	}
+        if (DEBUG) {
+            doPost(req, resp);
+        } else {
+            super.doGet(req, resp);
+        }
+    }
 
-	protected String getParameter(HttpServletRequest req, String parameter)
-			throws ServletException {
-		String value = req.getParameter(parameter);
-		if (isEmptyOrNull(value)) {
-			if (DEBUG) {
-				StringBuilder parameters = new StringBuilder();
-				@SuppressWarnings("unchecked")
-				Enumeration<String> names = req.getParameterNames();
-				while (names.hasMoreElements()) {
-					String name = names.nextElement();
-					String param = req.getParameter(name);
-					parameters.append(name).append("=").append(param)
-							.append("\n");
-				}
-				logger.fine("parameters: " + parameters);
-			}
-			throw new ServletException("Parameter " + parameter + " not found");
-		}
-		return value.trim();
-	}
+    protected String getParameter(HttpServletRequest req, String parameter)
+            throws ServletException {
+        String value = req.getParameter(parameter);
+        if (isEmptyOrNull(value)) {
+            if (DEBUG) {
+                StringBuilder parameters = new StringBuilder();
+                @SuppressWarnings("unchecked")
+                Enumeration<String> names = req.getParameterNames();
+                while (names.hasMoreElements()) {
+                    String name = names.nextElement();
+                    String param = req.getParameter(name);
+                    parameters.append(name).append("=").append(param)
+                            .append("\n");
+                }
+                logger.fine("parameters: " + parameters);
+            }
+            throw new ServletException("Parameter " + parameter + " not found");
+        }
+        return value.trim();
+    }
 
-	protected String getParameter(HttpServletRequest req, String parameter,
-			String defaultValue) {
-		String value = req.getParameter(parameter);
-		if (isEmptyOrNull(value)) {
-			value = defaultValue;
-		}
-		return value.trim();
-	}
+    protected String getParameter(HttpServletRequest req, String parameter,
+                                  String defaultValue) {
+        String value = req.getParameter(parameter);
+        if (isEmptyOrNull(value)) {
+            value = defaultValue;
+        }
+        return value.trim();
+    }
 
-	protected void setSuccess(HttpServletResponse resp) {
-		setSuccess(resp, 0);
-	}
+    protected void setSuccess(HttpServletResponse resp) {
+        setSuccess(resp, 0);
+    }
 
-	protected void setSuccess(HttpServletResponse resp, int size) {
-		resp.setStatus(HttpServletResponse.SC_OK);
-		resp.setContentType("text/plain");
-		resp.setContentLength(size);
-	}
+    protected void setSuccess(HttpServletResponse resp, int size) {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("text/plain");
+        resp.setContentLength(size);
+    }
 
-	protected boolean isEmptyOrNull(String value) {
-		return value == null || value.trim().length() == 0;
-	}
+    protected boolean isEmptyOrNull(String value) {
+        return value == null || value.trim().length() == 0;
+    }
 
-	protected String readJsonRequest(HttpServletRequest request)
-			throws IOException {
-		try {
-			reader = new BufferedReader(new InputStreamReader(
-					request.getInputStream()));
-			buffer = new StringBuffer();
-			int read;
-			char[] chars = new char[1024];
-			while ((read = reader.read(chars)) != -1)
-				buffer.append(chars, 0, read);
-		} finally {
-			if (reader != null)
-				reader.close();
-		}
-		return buffer.toString();
-	}
+    protected String readJsonRequest(HttpServletRequest request)
+            throws IOException {
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                    request.getInputStream()));
+            buffer = new StringBuffer();
+            int read;
+            char[] chars = new char[1024];
+            while ((read = reader.read(chars)) != -1)
+                buffer.append(chars, 0, read);
+        } finally {
+            if (reader != null)
+                reader.close();
+        }
+        return buffer.toString();
+    }
 }

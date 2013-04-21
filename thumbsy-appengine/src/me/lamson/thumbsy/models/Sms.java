@@ -1,5 +1,16 @@
 package me.lamson.thumbsy.models;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Ignore;
+import com.googlecode.objectify.annotation.Index;
+
+@XmlRootElement
+@Entity
+// @XmlType(propOrder = { "id", "incoming", "content" })
 public class Sms {
 
 	public static final String ENTITY_NAME = "Message";
@@ -12,13 +23,21 @@ public class Sms {
 	public static final String PROPERTY_BODY = "body";
 	public static final String PROPERTY_DATE = "date";
 
+	@Id
 	private Long id;
+	@Index
+	transient private Key<SmsThread> threadKey;
+	@Index
 	private Long threadId;
+	@Index
 	private String address;
+	@Index
 	private Boolean read;
 	private Boolean incoming;
 	private String body;
+	@Index
 	private Long date;
+	@Ignore
 	private String userId;
 
 	public Sms() {
@@ -109,6 +128,14 @@ public class Sms {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public Key<SmsThread> getThreadKey() {
+		return threadKey;
+	}
+
+	public void setThreadKey(Key<SmsThread> threadKey) {
+		this.threadKey = threadKey;
 	}
 
 }

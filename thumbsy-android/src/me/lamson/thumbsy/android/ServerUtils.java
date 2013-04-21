@@ -231,7 +231,7 @@ public final class ServerUtils {
 	 * @throws IOException
 	 *             propagated from POST.
 	 */
-	private static void post(String endpoint, Map<String, String> params)
+	static void post(String endpoint, Map<String, String> params)
 			throws IOException {
 		URL url;
 		try {

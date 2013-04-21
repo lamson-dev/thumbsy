@@ -16,9 +16,17 @@
 
 package me.lamson.thumbsy.models;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+
 /**
  * @author Son Nguyen
  */
+@XmlRootElement
+@Entity
 public class User {
 
 	public static final String ENTITY_NAME = "User";
@@ -33,12 +41,18 @@ public class User {
 	public static final String PROPERTY_DATE = "date";
 	public static final String NO_CONVERSATION = "emptyField";
 
+	@Id
 	private Long id;
+	@Index
 	private String gcmRegId;
+	@Index
 	private String googleUserId;
+	@Index
 	private String displayName;
+	@Index
 	private String email;
 	private String profileUrl;
+	@Index
 	private String photoUrl;
 	private String coverUrl;
 	private String currentConversationAddress;

@@ -6,13 +6,19 @@ import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
 import static me.lamson.thumbsy.android.CommonUtils.URL_POST_MESSAGE;
+import static me.lamson.thumbsy.android.CommonUtils.URL_POST_NOTIFY;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import me.lamson.thumbsy.models.Sms;
+import me.lamson.thumbsy.models.SmsThread;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -26,7 +32,6 @@ import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 
 /**
- * 
  * @author Son Nguyen
  * @version $Revision: 1.0 $
  */
@@ -44,7 +49,7 @@ public class MainPresenter {
 	private final Set<Long> conversationsOnServer = new HashSet<Long>();
 
 	AsyncTask<Void, Void, Void> mRegisterTask, mSendMessageTask,
-			mSendConversationTask;
+			mNotifyServerTask;
 
 	public MainPresenter(IMainView view) {
 		mView = view;
@@ -97,8 +102,11 @@ public class MainPresenter {
 					|| msgAddress.equals("+12063498182")
 					|| msgAddress.equals("+12152067916")
 					|| msgAddress.equals("+16784620039")
-					|| msgAddress.equals("+16823679168"))
+					|| msgAddress.equals("+16823679168")) {
 				sendMessageToServer(msg);
+				notifyServer(msgAddress);
+			}
+
 		}
 
 	};
@@ -106,8 +114,6 @@ public class MainPresenter {
 	/**
 	 * initialize GCM, check whether device could register for GCM or not, if
 	 * good then register a messageReceiver
-	 * 
-	 * @param context
 	 */
 	public void initGCM() {
 		checkNotNull(SERVER_URL, "SERVER_URL");
@@ -166,6 +172,34 @@ public class MainPresenter {
 
 		};
 		mSendMessageTask.execute(null, null, null);
+	}
+
+	public void notifyServer(final String address) {
+
+		mNotifyServerTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				Map<String, String> parameters = new HashMap<String, String>();
+				try {
+					parameters.put(SmsThread.PROPERTY_USER_ID, ThumbsyApp
+							.getUser().getId());
+					parameters.put(SmsThread.PROPERTY_ADDRESS,
+							URLEncoder.encode(address, "UTF-8"));
+					ServerUtils.post(URL_POST_NOTIFY, parameters);
+				} catch (IOException e) {
+					Log.d(TAG, "IOException at notifyServer()");
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				mNotifyServerTask = null;
+			}
+
+		};
+		mNotifyServerTask.execute(null, null, null);
 	}
 
 	private void sendSMS(String phoneNumber, String msgBody) {

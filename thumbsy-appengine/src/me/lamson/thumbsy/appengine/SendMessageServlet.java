@@ -15,12 +15,6 @@
  */
 package me.lamson.thumbsy.appengine;
 
-import com.google.android.gcm.server.Constants;
-import com.google.android.gcm.server.Message;
-import com.google.android.gcm.server.MulticastResult;
-import com.google.android.gcm.server.Result;
-import com.google.android.gcm.server.Sender;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
 import me.lamson.thumbsy.models.Sms;
+
+import com.google.android.gcm.server.Constants;
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.MulticastResult;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
 
 /**
  * Servlet that sends a message to a device.

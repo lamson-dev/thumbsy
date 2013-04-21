@@ -48,6 +48,34 @@ appServices.factory('ThumbsyApi', function ($http, Conf) {
             return $http.post('/sendAll', jsonMsgData);
         },
 
+        makeRequestToken: function (getTokenUrl, async) {
+            var httpRequest;
+            if (window.XMLHttpRequest) {
+                // Mozilla, Safari, ...
+                httpRequest = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                // IE
+                try {
+                    httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+                }
+                catch (e) {
+                    try {
+                        httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    catch (e) {
+                    }
+                }
+            }
+
+            if (!httpRequest) {
+                alert('Giving up :( Cannot create an XMLHTTP instance');
+                return false;
+            }
+            httpRequest.open('POST', getTokenUrl, async);
+            httpRequest.send();
+            return httpRequest;
+        },
+
         signIn: function (authResult) {
             return $http.post(Conf.apiBase + 'connect', authResult);
         },

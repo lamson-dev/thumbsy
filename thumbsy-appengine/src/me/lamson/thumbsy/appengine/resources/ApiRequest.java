@@ -6,9 +6,9 @@ import com.google.gson.annotations.SerializedName;
  * Request Java Bean - Custom request from user - User can make POST with a JSON
  * string, this POST then be redirected to GET to retrieve data with particular
  * parameters
- * 
+ *
+ *
  * @author Son Nguyen
- * 
  */
 public class ApiRequest {
 

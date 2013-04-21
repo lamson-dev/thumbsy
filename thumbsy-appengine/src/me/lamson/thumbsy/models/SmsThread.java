@@ -1,5 +1,13 @@
 package me.lamson.thumbsy.models;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+
+@XmlRootElement
+@Entity
 public class SmsThread {
 
 	public static final String ENTITY_NAME = "SmsThread";
@@ -9,9 +17,13 @@ public class SmsThread {
 	public static final String PROPERTY_RECIPIENT_NAME = "recipientName";
 	public static final String PROPERTY_DATE = "date";
 
+	@Id
 	private String id;
+	@Index
 	private String userId;
+	@Index
 	private String address;
+	@Index
 	private Long date;
 	private String recipientName;
 	private Integer numberOfMessages = 0;

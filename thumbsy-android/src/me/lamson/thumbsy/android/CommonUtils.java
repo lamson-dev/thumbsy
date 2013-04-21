@@ -34,6 +34,7 @@ public final class CommonUtils {
 
 	static final String URL_POST_MESSAGE = "http://thumbsy-demo.appspot.com/api/messages";
 	static final String URL_POST_CONVERSATION = "http://thumbsy-demo.appspot.com/api/conversations";
+    static final String URL_POST_NOTIFY = "http://thumbsy-demo.appspot.com/notify";
 
 	/**
 	 * Google API project id registered to use GCM.

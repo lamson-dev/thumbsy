@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="appengine-api-1.0-sdk-1.7.6.jar" scope="COMPILE">
+		<srcroot url="jar:///Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.7.6/appengine-java-sdk-1.7.6/src/user/appengine-api-1.0-sdk-1.7.6-src.zip!/"/>
+	</lib>
+	<lib name="sass-stdlib" scope="PROVIDED"/>
+	<levels>
+		<level name="google-gson-2.2.2" value="project"/>
+		<level name="guice-3.0" value="project"/>
+		<level name="objectify-4.0b2" value="project"/>
+		<level name="jersey-archive-1.17" value="project"/>
+	</levels>
+</component>

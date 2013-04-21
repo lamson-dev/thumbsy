@@ -5,8 +5,6 @@ import static me.lamson.thumbsy.appengine.OfyService.ofy;
 import java.util.Date;
 import java.util.List;
 
-import com.googlecode.objectify.Key;
-
 import me.lamson.thumbsy.models.SmsThread;
 
 /**
