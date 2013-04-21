@@ -48,8 +48,6 @@ appServices.factory('ThumbsyApi', function ($http, Conf) {
             return $http.post('/sendAll', jsonMsgData);
         },
 
-
-
         signIn: function (authResult) {
             return $http.post(Conf.apiBase + 'connect', authResult);
         },
@@ -86,7 +84,8 @@ appServices.factory('ThumbsyApi', function ($http, Conf) {
             return $http.post(Conf.apiBase + 'disconnect');
         }
     };
-});
+})
+;
 
 myApp.factory('Data', function () {
     return {message: "I'm data from a service"};

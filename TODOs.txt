@@ -1,0 +1,50 @@
+TODOs.txt
+
+- update last message time on conversation list
+
+- when refresh, homepage shows up
+    + only inject homepage after checking signed-in?
+
+- implement Sign-Out, instead of Disconnect
+
+- edit conversation-box...
+    + have current address shown on top, with photo
+    + do a template or something
+
+- spinner
+    + more than 1 spinner?
+
+- only show app after messages/conversations are fetched!
+
+- filter date for messages (like threadDate)
+
+- when user login web client
+    + check to see if user has android app or not
+    + if not, should direct user to install app (eg. over-the-air)
+
+
+- when fetch conversations list
+    + each thread should have its own photo
+    + add field photoUrl to SmsThread
+    + may add field last message in thread
+
+
+- add New Message functionality
+
+- move Disconnect button somewhere, maybe inside Settings
+
+- have backup SMS option
+
+- search bar search for sms/contacts
+
+- real-time
+
+- fetch current threads on android to server
+
+- write message from server to Inbox
+
+- figure out why Firefox doesn't reload after signed in
+
+- make a <debug> template
+
+- make use of Memcache API

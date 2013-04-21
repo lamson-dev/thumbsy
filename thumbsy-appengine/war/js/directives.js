@@ -51,3 +51,10 @@ appDirectives.directive('leave', function () {
     }
 });
 
+appDirectives.directive('hello', function () {
+    return  {
+        restrict: 'E',
+        templateUrl: 'templates/hello.html'
+    }
+});
+

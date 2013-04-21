@@ -1,70 +1,70 @@
 "use strict";
 
 function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
+
     // signIn
     $scope.userProfile = undefined;
     $scope.hasUserProfile = false;
     $scope.isSignedIn = false;
     $scope.immediateFailed = false;
+    $scope.loading = false;
 
     $scope.currentConversationAddress = '';
     $scope.messages = [
-        {
-            "address": "+16823679168",
-            "body": "ok doi ti' xuong' lien`",
-            "date": "1366505460297",
-            "id": "15005",
-            "incoming": "false",
-            "threadKey": null
-        },
-        {
-            "address": "+16823679168",
-            "body": "Now\n",
-            "date": "1366505374270",
-            "id": "15004",
-            "incoming": "true",
-            "threadKey": null
-        },
-        {
-            "address": "+16823679168",
-            "body": "good good, chung` nao` nau' an?",
-            "date": "1366505347685",
-            "id": "14007",
-            "incoming": "false",
-            "threadKey": null
-        }
+//        {
+//            "address": "+16823679168",
+//            "body": "ok doi ti' xuong' lien`",
+//            "date": "1366505460297",
+//            "id": "15005",
+//            "incoming": "false",
+//            "threadKey": null
+//        },
+//        {
+//            "address": "+16823679168",
+//            "body": "Now\n",
+//            "date": "1366505374270",
+//            "id": "15004",
+//            "incoming": "true",
+//            "threadKey": null
+//        },
+//        {
+//            "address": "+16823679168",
+//            "body": "good good, chung` nao` nau' an?",
+//            "date": "1366505347685",
+//            "id": "14007",
+//            "incoming": "false",
+//            "threadKey": null
+//        }
     ];
     $scope.threads = [
-        {
-            "address": "+12052085117",
-            "date": "1366450027708",
-            "id": "+12052085117118226533603167233005",
-            "userId": "118226533603167233005"
-        },
-        {
-            "address": "+16823679168",
-            "date": "1366485584711",
-            "id": "+16823679168118226533603167233005",
-            "userId": "118226533603167233005"
-        }
+//        {
+//            "address": "+12052085117",
+//            "date": "1366450027708",
+//            "id": "+12052085117118226533603167233005",
+//            "userId": "118226533603167233005"
+//        },
+//        {
+//            "address": "+16823679168",
+//            "date": "1366485584711",
+//            "id": "+16823679168118226533603167233005",
+//            "userId": "118226533603167233005"
+//        }
     ];
 
     $scope.enjoyApp = function () {
+        $scope.loading = true;
         $.when($scope.fetchConversations(),
                 $scope.fetchCurrentConversation())
             .done(function () {
-//                $('#main').css('background-image', 'url(' + $scope.userProfile.cover.coverPhoto.url + ')');
                 $('#authOps').show('slow');
                 helper.people();
+                $scope.loading = false;
             });
     };
 
     $scope.exitApp = function () {
-        $('#main').hide();
-        $('#sidebar').empty();
-        $('#main-content').empty();
+        $('#main').empty();
         $('#visiblePeople').empty();
-        $('#authResult').empty();
     };
 
     $scope.addMessage = function ($event, messageBody) {
@@ -92,9 +92,8 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
                 // confirm when received notice from android client
                 // if didn't send, should delete
                 // and then set input textbox to the message
-                $scope.messages.push(jsonObj);
+                $scope.messages.unshift(jsonObj);
                 $scope.messageBody = '';
-                // $("#message-box").animate({ scrollTop: $('#message-box')[0].scrollHeight}, 1000);
                 $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
 
             }).error(function (respData, respStatus, headers, config) {
@@ -107,7 +106,6 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
     };
 
     $scope.fetchCurrentConversation = function () {
-        $('#spinner').show();
         ThumbsyApi.getCurrentMessages($scope.userProfile.id)
             .success(function (data, status) {
                 console.log('ThumbsyApi.getCurrentMessages status: ', status)
@@ -119,14 +117,12 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
 
                 $scope.currentConversationAddress = $scope.messages[0].address;
                 $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
-                $('#spinner').hide();
             }).error(function (data, status) {
                 console.log('error ThumbsyApi.getCurrentMessages: ', status);
             });
     };
 
     $scope.fetchConversation = function (index) {
-        $('#spinner').show();
         var address = $scope.threads[index].address;
         $scope.currentConversationAddress = address;
 
@@ -145,7 +141,6 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
                     $scope.messages.push(data.sms);
 
                 $("#message-box").animate({ scrollTop: $('#message-box').prop("scrollHeight")}, 1000);
-                $('#spinner').hide();
 
             }).error(function (data, status) {
                 console.log('error ThumbsyApi.getMessages: ', status);
@@ -172,7 +167,7 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
     };
 
     $scope.getCharCount = function (messageBody) {
-        return MAX_CHAR_PER_TEXT - ("" + messageBody).trim().length;
+        return MAX_CHAR_PER_TEXT - ("" + messageBody).length;
     };
 
     $scope.deleteMessage = function (index) {
@@ -245,9 +240,6 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
         $scope.userProfile = profile;
         $scope.hasUserProfile = true;
 
-
-//        $scope.enjoyApp();
-
         console.log('ID: ' + profile.id);
         console.log('Display Name: ' + profile.displayName);
         console.log('Image URL: ' + profile.image.url);
@@ -302,15 +294,11 @@ function ThumbsyCtrl($scope, $location, Conf, ThumbsyApi) {
                     });
                 });
             } else if (authResult['error']) {
-
                 console.log('authResult[\'error\']: ' + authResult['error']);
-
                 // There was an error, which means the user is not signed in.
                 if (authResult['error'] == 'immediate_failed') {
                     // show signin button
                     $scope.immediateFailed = true;
-
-                    $('#authResult').append('Logged out');
                     $('#authOps').hide('slow');
                 } else {
                     // other error
