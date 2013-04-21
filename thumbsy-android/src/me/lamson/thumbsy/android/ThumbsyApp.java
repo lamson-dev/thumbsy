@@ -16,10 +16,11 @@
 
 package me.lamson.thumbsy.android;
 
-import com.google.android.gms.plus.model.people.Person;
-
+import me.lamson.thumbsy.models.User;
 import android.app.Application;
 import android.content.Context;
+
+import com.google.android.gms.plus.model.people.Person;
 
 /**
  * Used to maintain global application state across PhotoHunt.
@@ -35,7 +36,8 @@ public class ThumbsyApp extends Application {
 	// private ImageLoader mImageLoader;
 
 	private static Context mContext;
-	private static Person mUser;
+	private static Person mPlusPerson;
+	private static User mUser;
 	private static boolean mAppIsRegistered;
 
 	@Override
@@ -66,11 +68,11 @@ public class ThumbsyApp extends Application {
 	}
 
 	public static void setUser(Person user) {
-		ThumbsyApp.mUser = user;
+		ThumbsyApp.mPlusPerson = user;
 	}
 
 	public static Person getUser() {
-		return mUser;
+		return mPlusPerson;
 	}
 
 	public static boolean appIsRegistered() {

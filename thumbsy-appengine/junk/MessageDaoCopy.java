@@ -1,3 +1,4 @@
+package me.lamson.thumbsy.appengine.dao;
 //package me.lamson.thumbsy.appengine;
 //
 //import static me.lamson.thumbsy.appengine.OfyService.ofy;

@@ -30,7 +30,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 	private EditText etClientMessage;
 
 	public MainActivity() {
-		mPresenter = new MainPresenter(this, this);
+		mPresenter = new MainPresenter(this);
 	}
 
 	@Override
@@ -38,9 +38,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		init();
-		mPresenter.initGCM(this);
+		mPresenter.initGCM();
 		// automatically register user to GCM and app server
-		mPresenter.registerDevice(this);
+		mPresenter.registerDevice();
 		Log.d(TAG, "device registered");
 	}
 
@@ -68,16 +68,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 			mSignInFragment.revokeAccessAndDisconnect();
 
 			// unregister device on revoke
-			mPresenter.unregisterDevice(this);
+			mPresenter.unregisterDevice();
 
 			// TODO: have a progress bar for unregistering
 
 			backToSignInActivity();
 			break;
 		case R.id.btn_send:
-			mPresenter.sendMessageToServer(new Sms(Long.valueOf(1),
-					"hello from Android", "+12052085117", true, new Date()
-							.toString()));
+			mPresenter.sendMessageToServer(new Sms(null, "hello from Android",
+					"+12052085117", true, new Date().getTime()));
 			this.etClientMessage.setText(null);
 			break;
 		}
@@ -143,7 +142,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
 
 	@Override
 	protected void onDestroy() {
-		mPresenter.cleanUpGCM(this);
+		mPresenter.cleanUpGCM();
 		super.onDestroy();
 	}
 

@@ -31,6 +31,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
+import me.lamson.thumbsy.models.Sms;
+
 /**
  * Servlet that sends a message to a device.
  * <p>
@@ -121,8 +124,9 @@ public class SendMessageServlet extends BaseServlet {
 		logger.info("Sending message to device " + regId);
 
 		// NOTE: modified this
-		Message message = new Message.Builder().addData("content", newMessage)
-				.addData("address", address).build();
+		Message message = new Message.Builder()
+				.addData(Sms.PROPERTY_BODY, newMessage)
+				.addData(Sms.PROPERTY_ADDRESS, address).build();
 
 		Result result;
 		try {

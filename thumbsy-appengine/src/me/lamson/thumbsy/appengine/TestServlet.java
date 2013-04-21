@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,8 +50,8 @@ public class TestServlet extends BaseServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 
-		c = new SmsThread(Long.valueOf(1), "118226533603167233005",
-				"+12052085117");
+		c = new SmsThread("+12052085117118226533603167233005",
+				"118226533603167233005", "+12052085117");
 		json = GSON.toJson(c);
 
 		writer = resp.getWriter();
@@ -64,7 +65,7 @@ public class TestServlet extends BaseServlet {
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		resp.setContentType("application/json");
-		m = new Sms(Long.valueOf(1), "hello", "+12052085117", false);
+		m = new Sms(null, "hello", "+12052085117", false, new Date().getTime());
 		json = GSON.toJson(m);
 		writer = resp.getWriter();
 		writer.print(json);

@@ -18,32 +18,26 @@ public class SmsThread {
 	public static final String PROPERTY_DATE = "date";
 
 	@Id
-	private Long id;
+	private String id;
 	@Index
 	private String userId;
 	@Index
 	private String address;
 	@Index
-	private String date;
+	private Long date;
 	private String recipientName;
 	private Integer numberOfMessages = 0;
 
 	public SmsThread() {
 	}
 
-	public SmsThread(Long id, String userId, String address) {
+	public SmsThread(String id, String userId, String address) {
 		this.setId(id);
 		this.setUserId(userId);
 		this.setAddress(address);
 	}
 
-	public SmsThread(String userId, String address, String recipientName) {
-		this.userId = userId;
-		this.address = address;
-		this.recipientName = recipientName;
-	}
-
-	public SmsThread(Long id, String userId, String address,
+	public SmsThread(String id, String userId, String address,
 			String recipientName) {
 		this.id = id;
 		this.userId = userId;
@@ -59,11 +53,11 @@ public class SmsThread {
 		this.userId = userId;
 	}
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -91,11 +85,11 @@ public class SmsThread {
 		this.address = address;
 	}
 
-	public String getDate() {
+	public Long getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(Long date) {
 		this.date = date;
 	}
 }

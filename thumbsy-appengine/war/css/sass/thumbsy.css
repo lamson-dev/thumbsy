@@ -2,15 +2,29 @@ html, body {
   min-height: 100%; }
 
 #sidebar {
-  background-color: lightslategray;
-  height: 600px; }
+  -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
+  background-color: floralwhite;
+  height: 500px; }
+  #sidebar .thread {
+    border-bottom: dashed 1px darkslategrey; }
+  #sidebar h4 {
+    float: left;
+    margin: 0px;
+    padding: 5px; }
+  #sidebar span {
+    margin-right: 5px;
+    font-size: small; }
+  #sidebar .thread-highlight {
+    cursor: pointer;
+    background-color: lightblue; }
 
 .conversation-box {
   -webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   -moz-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
   background-color: #dceaf4;
-  margin-top: 20px;
   height: 500px;
   width: 400px; }
   .conversation-box .messages-box {
@@ -28,7 +42,7 @@ html, body {
   .conversation-box .user-input {
     height: 100px;
     position: absolute;
-    top: 480px;
+    top: 460px;
     margin: 5px;
     padding: 5px; }
     .conversation-box .user-input button {
@@ -42,17 +56,24 @@ html, body {
       top: 70px;
       right: 125px; }
 
+#background {
+  position: absolute;
+  opacity: 0.2;
+  z-index: -1;
+  top: -20px;
+  width: 100%;
+  height: 100%; }
+
 .incoming-true {
   background-color: peachpuff; }
 
 .incoming-false {
-  background-color: snow;
-  text-align: right; }
+  background-color: snow; }
 
-#login {
+#profileInfo {
   margin-top: 4px;
   height: 30px; }
-  #login img {
+  #profileInfo img {
     height: 30px; }
 
 p {

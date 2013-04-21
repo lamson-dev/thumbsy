@@ -24,6 +24,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
+import me.lamson.thumbsy.appengine.dao.SmsDao;
+import me.lamson.thumbsy.appengine.dao.SmsThreadDao;
 import me.lamson.thumbsy.models.Sms;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -55,7 +58,8 @@ public class SendAllMessagesServlet extends BaseServlet {
 			String msgAddress = msg.getAddress();
 			String msgUserId = msg.getUserId();
 			String deviceRegId = DatastoreGCM.getRegIdByUserId(msgUserId);
-			Long msgThreadId = msg.getThreadId();
+			
+			String msgThreadId = msgAddress + msgUserId;
 
 			// NOTE: when succeed sending message, save to datastore
 			// should complete by android client, when message sent,

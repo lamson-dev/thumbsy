@@ -15,6 +15,7 @@
  */
 package me.lamson.thumbsy.android;
 
+import static me.lamson.thumbsy.android.CommonUtils.GSON;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
 import static me.lamson.thumbsy.android.CommonUtils.TAG;
 import static me.lamson.thumbsy.android.CommonUtils.displayMessage;
@@ -30,13 +31,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import me.lamson.thumbsy.android.R;
-import me.lamson.thumbsy.android.R.string;
+import me.lamson.thumbsy.models.User;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.plus.model.people.Person;
 
 /**
  * Helper class used to communicate with the demo server.
@@ -52,14 +63,33 @@ public final class ServerUtils {
 	 * 
 	 * @return whether the registration succeeded or not.
 	 */
-	static boolean register(final Context context, final String regId,
-			final String userId) {
+	static boolean register(final Context context, final String regId) {
 		Log.i(TAG, "registering device (regId = " + regId + ")");
-		String serverUrl = SERVER_URL + "/register";
-		Map<String, String> params = new HashMap<String, String>();
 
+		// device is registered with GCM
+		// now register user on thumbsy server
+
+		Person p = ThumbsyApp.getUser();
+
+		String displayName = (p.hasDisplayName()) ? p.getDisplayName() : null;
+		String email = (p.hasEmails()) ? p.getEmails().get(0).getValue() : null;
+		String profileUrl = (p.hasUrl()) ? p.getUrl() : null;
+		String photoUrl = (p.hasImage()) ? p.getImage().getUrl() : null;
+		String coverUrl = (p.hasCover()) ? p.getCover().getCoverPhoto()
+				.getUrl() : null;
+
+		User user = new User(regId, p.getId(), displayName, email, profileUrl,
+				photoUrl, coverUrl);
+
+		String serverUrl = SERVER_URL + "/register";
+
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("regId", regId);
-		params.put("userId", userId);
+		params.put("googleUserId", p.getId());
+
+		String jsonData = GSON.toJson(user);
+
+		Log.d(TAG, jsonData);
 
 		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
 		// Once GCM returns a registration id, we need to register it in the
@@ -67,19 +97,20 @@ public final class ServerUtils {
 		// times.
 		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
 			Log.d(TAG, "Attempt #" + i + " to register");
-			try {
-				displayMessage(context, context.getString(
-						R.string.server_registering, i, MAX_ATTEMPTS));
-				post(serverUrl, params);
+			// try {
+			displayMessage(context, context.getString(
+					R.string.server_registering, i, MAX_ATTEMPTS));
+
+			if (postJsonData(serverUrl, jsonData)) {
 				GCMRegistrar.setRegisteredOnServer(context, true);
 				String message = context.getString(R.string.server_registered);
 				CommonUtils.displayMessage(context, message);
 				return true;
-			} catch (IOException e) {
+			} else {
 				// Here we are simplifying and retrying on any error; in a real
-				// application, it should retry only on unrecoverable errors
-				// (like HTTP error code 503).
-				Log.e(TAG, "Failed to register on attempt " + i, e);
+				// // application, it should retry only on unrecoverable errors
+				// // (like HTTP error code 503).
+				// Log.e(TAG, "Failed to register on attempt " + i, e);
 				if (i == MAX_ATTEMPTS) {
 					break;
 				}
@@ -95,6 +126,32 @@ public final class ServerUtils {
 				// increase backoff exponentially
 				backoff *= 2;
 			}
+
+			// post(serverUrl, params);
+			// GCMRegistrar.setRegisteredOnServer(context, true);
+			// String message = context.getString(R.string.server_registered);
+			// CommonUtils.displayMessage(context, message);
+			// return true;
+			// } catch (IOException e) {
+			// // Here we are simplifying and retrying on any error; in a real
+			// // application, it should retry only on unrecoverable errors
+			// // (like HTTP error code 503).
+			// Log.e(TAG, "Failed to register on attempt " + i, e);
+			// if (i == MAX_ATTEMPTS) {
+			// break;
+			// }
+			// try {
+			// Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
+			// Thread.sleep(backoff);
+			// } catch (InterruptedException e1) {
+			// // Activity finished before we complete - exit.
+			// Log.d(TAG, "Thread interrupted: abort remaining retries!");
+			// Thread.currentThread().interrupt();
+			// return false;
+			// }
+			// // increase backoff exponentially
+			// backoff *= 2;
+			// }
 		}
 		String message = context.getString(R.string.server_register_error,
 				MAX_ATTEMPTS);
@@ -125,6 +182,42 @@ public final class ServerUtils {
 					R.string.server_unregister_error, e.getMessage());
 			CommonUtils.displayMessage(context, message);
 		}
+	}
+
+	static boolean postJsonData(String url, String json) {
+
+		HttpClient client = new DefaultHttpClient();
+
+		HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); // Timeout
+		HttpResponse response;
+
+		try {
+			HttpPost post = new HttpPost(url);
+			StringEntity se = new StringEntity(json);
+			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+					"application/json"));
+			post.setEntity(se);
+			response = client.execute(post);
+
+			// HttpPost request = new HttpPost(serverUrl);
+			// request.setEntity(new ByteArrayEntity(
+			// postMessage.toString().getBytes("UTF8")));
+			// HttpResponse response = client.execute(request);
+
+			/* Checking response */
+			if (response != null) {
+				Log.d(TAG, EntityUtils.toString(response.getEntity()));
+			}
+
+			return (response.getStatusLine().getStatusCode() == 200 || response
+					.getStatusLine().getStatusCode() == 201);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.e(TAG, "Cannot Estabilish Connection");
+		}
+		return false;
+
 	}
 
 	/**

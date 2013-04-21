@@ -33,14 +33,35 @@ html, body {
 
 #sidebar {
   //position: absolute;
-  background-color: lightslategray;
-  height: 600px;
+
+  @include shadowed;
+  background-color: floralwhite;
+  height: 500px;
+
+  .thread {
+    border-bottom: dashed 1px darkslategray;
+  }
+
+  h4 {
+    float: left;
+    margin: 0px;
+    padding: 5px;
+  }
+
+  span {
+    margin-right: 5px;
+    font-size: small;
+  }
+
+  .thread-highlight {
+    cursor: pointer;
+    background-color: lightblue;
+  }
 }
 
 .conversation-box {
   @include shadowed;
   background-color: $msgbox-color;
-  margin-top: 20px;
   height: 500px;
   width: 400px;
 
@@ -59,7 +80,7 @@ html, body {
   .user-input {
     height: 100px;
     position: absolute;
-    top: 480px;
+    top: 460px;
     margin: 5px;
     padding: 5px;
 
@@ -82,26 +103,30 @@ html, body {
 
 }
 
+#background {
+  position: absolute;
+  opacity: 0.2;
+  z-index: -1;
+  top: -20px;
+  width: 100%;
+  height: 100%;
+}
+
 .incoming-true {
   background-color: peachpuff;
 }
 
 .incoming-false {
   background-color: snow;
-  text-align: right;
+  //text-align: right;
 }
 
-#login {
+#profileInfo {
   margin-top: 4px;
   height: 30px;
   img {
     height: 30px;
   }
-}
-
-#profile {
-  //display: inline;
-
 }
 
 p {

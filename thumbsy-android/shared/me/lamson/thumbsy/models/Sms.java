@@ -16,6 +16,7 @@ public class Sms {
 	public static final String ENTITY_NAME = "Message";
 	public static final String PROPERTY_ID = "messageId";
 	public static final String PROPERTY_THREAD_ID = "threadId";
+	public static final String PROPERTY_THREAD_KEY = "threadKey";
 	public static final String PROPERTY_ADDRESS = "address";
 	public static final String PROPERTY_READ = "read";
 	public static final String PROPERTY_INCOMING = "incoming";
@@ -34,7 +35,8 @@ public class Sms {
 	private Boolean read;
 	private Boolean incoming;
 	private String body;
-	private String date;
+	@Index
+	private Long date;
 	@Ignore
 	private String userId;
 
@@ -46,7 +48,7 @@ public class Sms {
 	}
 
 	public Sms(Long msgId, String msgBody, String msgAddress, Boolean incoming,
-			String date) {
+			Long date) {
 		this.setId(msgId);
 		this.setBody(msgBody);
 		this.setAddress(msgAddress);
@@ -112,11 +114,11 @@ public class Sms {
 		this.body = body;
 	}
 
-	public String getDate() {
+	public Long getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(Long date) {
 		this.date = date;
 	}
 

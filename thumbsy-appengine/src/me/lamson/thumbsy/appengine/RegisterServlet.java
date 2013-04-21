@@ -15,9 +15,15 @@
  */
 package me.lamson.thumbsy.appengine;
 
+import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
+import me.lamson.thumbsy.appengine.dao.UserDao;
+import me.lamson.thumbsy.models.User;
 
 /**
  * Servlet that registers a device, whose registration id is identified by
@@ -31,15 +37,19 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class RegisterServlet extends BaseServlet {
 
-	private static final String PARAMETER_REG_ID = "regId";
-	private static final String PARAMETER_USER_ID = "userId";
+	// private static final String PARAMETER_REG_ID = "regId";
+	// private static final String PARAMETER_USER_ID = "userId";
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException {
-		String regId = getParameter(req, PARAMETER_REG_ID);
-		String userId = getParameter(req, PARAMETER_USER_ID);
-		DatastoreGCM.register(userId, regId);
+			throws ServletException, IOException {
+		// String regId = getParameter(req, PARAMETER_REG_ID);
+		// String userId = getParameter(req, PARAMETER_USER_ID);
+
+		String jsonData = readJsonRequest(req);
+		User user = GSON.fromJson(jsonData, User.class);
+		UserDao.storeUser(user);
+		DatastoreGCM.register(user.getGoogleUserId(), user.getGcmRegId());
 		setSuccess(resp);
 	}
 

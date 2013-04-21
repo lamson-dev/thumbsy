@@ -8,7 +8,6 @@ import javax.ws.rs.core.MediaType;
 import com.google.gson.Gson;
 
 /**
- * Brands Resource - Return responses for HTTP requests for a number of brands
  * 
  * @author Son Nguyen
  * 
@@ -16,6 +15,6 @@ import com.google.gson.Gson;
 @Produces(MediaType.APPLICATION_JSON)
 public class BaseResource {
 
-	final static Gson GSON = new Gson();
+	protected final static Gson GSON = new Gson();
 	protected final Logger logger = Logger.getLogger(getClass().getName());
 }

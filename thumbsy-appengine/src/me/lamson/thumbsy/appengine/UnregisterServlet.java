@@ -19,6 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
+
+
 /**
  * Servlet that unregisters a device, whose registration id is identified by
  * {@link #PARAMETER_REG_ID}.
@@ -36,6 +39,9 @@ public class UnregisterServlet extends BaseServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException {
     String regId = getParameter(req, PARAMETER_REG_ID);
+    
+    // TODO: delete user on server too
+    
     DatastoreGCM.unregister(regId);
     setSuccess(resp);
   }

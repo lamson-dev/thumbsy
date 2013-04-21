@@ -67,7 +67,6 @@ public class SignInActivity extends BaseActivity implements
 
 	private void enjoyMessaging() {
 		Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-		// intent.putExtra("isSignedIn", true);
 		startActivity(intent);
 		finish();
 	}

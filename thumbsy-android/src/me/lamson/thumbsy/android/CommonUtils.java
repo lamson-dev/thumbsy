@@ -15,6 +15,7 @@
  */
 package me.lamson.thumbsy.android;
 
+import me.lamson.thumbsy.models.Sms;
 import android.content.Context;
 import android.content.Intent;
 
@@ -51,6 +52,8 @@ public final class CommonUtils {
 
 	static final String RECEIVE_SMS_ACTION = "me.lamson.thumbsy.android.RECEIVE_SMS";
 
+	static final String RECEIVE_GCM_MESSAGE_ACTION = "me.lamson.thumbsy.android.RECEIVE_GCM_MESSAGE_ACTION";
+
 	/**
 	 * Intent's extra that contains the message to be displayed.
 	 */
@@ -73,17 +76,17 @@ public final class CommonUtils {
 	static void displayMessage(Context context, String message) {
 		Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
 		intent.putExtra(EXTRA_MESSAGE, message);
-		// intent.putExtra(EXTRA_ADDRESS, "+12052085117");
+		intent.putExtra(EXTRA_ADDRESS, "+12052085117");
 		// intent.putExtra(EXTRA_ADDRESS, "+16823679168");
-		intent.putExtra(EXTRA_ADDRESS, "+12152067916");
+		// intent.putExtra(EXTRA_ADDRESS, "+12152067916");
 		context.sendBroadcast(intent);
 	}
 
 	static void broadcastMsgFromGCM(Context context, String message,
 			String address) {
-		Intent intent = new Intent(DISPLAY_MESSAGE_ACTION);
-		intent.putExtra(EXTRA_MESSAGE, message);
-		intent.putExtra(EXTRA_ADDRESS, address);
+		Intent intent = new Intent(RECEIVE_GCM_MESSAGE_ACTION);
+		intent.putExtra(Sms.PROPERTY_BODY, message);
+		intent.putExtra(Sms.PROPERTY_ADDRESS, address);
 		context.sendBroadcast(intent);
 	}
 }

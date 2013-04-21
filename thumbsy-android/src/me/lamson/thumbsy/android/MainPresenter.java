@@ -1,6 +1,7 @@
 package me.lamson.thumbsy.android;
 
 import static me.lamson.thumbsy.android.CommonUtils.DISPLAY_MESSAGE_ACTION;
+import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_GCM_MESSAGE_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.RECEIVE_SMS_ACTION;
 import static me.lamson.thumbsy.android.CommonUtils.SENDER_ID;
 import static me.lamson.thumbsy.android.CommonUtils.SERVER_URL;
@@ -12,18 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import me.lamson.thumbsy.models.Sms;
-import me.lamson.thumbsy.models.SmsThread;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -44,19 +33,33 @@ import com.google.android.gcm.GCMRegistrar;
 public class MainPresenter {
 
 	private static final String TAG = MainPresenter.class.getSimpleName();
+
+	private static final String SENT = "SMS_SENT";
+	private static final String DELIVERED = "SMS_DELIVERED";
+	private static final int MAX_SMS_MESSAGE_LENGTH = 160;
+
 	private final IMainView mView;
-	private final Context mContext;
+	private final Context mAppContext;
+
 	private final Set<Long> conversationsOnServer = new HashSet<Long>();
 
 	AsyncTask<Void, Void, Void> mRegisterTask, mSendMessageTask,
 			mSendConversationTask;
 
-	private boolean isExisted = false;
-
-	public MainPresenter(IMainView view, Context context) {
+	public MainPresenter(IMainView view) {
 		mView = view;
-		mContext = context;
+		mAppContext = ThumbsyApp.getContext();
 	}
+
+	private final BroadcastReceiver mHandleMessage = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String msgBody = intent.getExtras().getString(
+					CommonUtils.EXTRA_MESSAGE);
+			// display message on screen
+			mView.getTvDisplay().append(msgBody + "\n");
+		}
+	};
 
 	private final BroadcastReceiver mHandleGCMMessageReceiver = new BroadcastReceiver() {
 		@Override
@@ -85,11 +88,16 @@ public class MainPresenter {
 					Sms.PROPERTY_ADDRESS);
 			String msgDate = intent.getExtras().getString(Sms.PROPERTY_DATE);
 
-			Sms msg = new Sms(msgId, msgBody, msgAddress, true, msgDate);
+			Sms msg = new Sms(null, msgBody, msgAddress, true,
+					Long.valueOf(msgDate));
 
 			mView.getTvDisplay().append(msgBody + "\n" + msgAddress);
 
-			if (msgAddress.equals("+12052085117"))
+			if (msgAddress.equals("+12052085117")
+					|| msgAddress.equals("+12063498182")
+					|| msgAddress.equals("+12152067916")
+					|| msgAddress.equals("+16784620039")
+					|| msgAddress.equals("+16823679168"))
 				sendMessageToServer(msg);
 		}
 
@@ -101,66 +109,36 @@ public class MainPresenter {
 	 * 
 	 * @param context
 	 */
-	public void initGCM(Context context) {
+	public void initGCM() {
 		checkNotNull(SERVER_URL, "SERVER_URL");
 		checkNotNull(SENDER_ID, "SENDER_ID");
 
 		// Make sure the device has the proper dependencies.
-		GCMRegistrar.checkDevice(context);
+		GCMRegistrar.checkDevice(mAppContext);
 
 		// Make sure the manifest was properly set - comment out this line
 		// while developing the app, then uncomment it when it's ready.
-		GCMRegistrar.checkManifest(context);
+		GCMRegistrar.checkManifest(mAppContext);
 
-		context.registerReceiver(mHandleGCMMessageReceiver, new IntentFilter(
+		mAppContext.registerReceiver(mHandleMessage, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
 
-		context.registerReceiver(mHandleSMSReceiver, new IntentFilter(
+		mAppContext.registerReceiver(mHandleGCMMessageReceiver,
+				new IntentFilter(RECEIVE_GCM_MESSAGE_ACTION));
+
+		mAppContext.registerReceiver(mHandleSMSReceiver, new IntentFilter(
 				RECEIVE_SMS_ACTION));
 	}
 
-	public void cleanUpGCM(Context context) {
+	public void cleanUpGCM() {
 		if (mRegisterTask != null) {
 			mRegisterTask.cancel(true);
 		}
-		context.unregisterReceiver(mHandleGCMMessageReceiver);
-		context.unregisterReceiver(mHandleSMSReceiver);
-		GCMRegistrar.onDestroy(context);
-	}
 
-	private final boolean postJsonData(String url, String json) {
-
-		HttpClient client = new DefaultHttpClient();
-
-		HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); // Timeout
-		HttpResponse response;
-
-		try {
-			HttpPost post = new HttpPost(url);
-			StringEntity se = new StringEntity(json);
-			se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
-			post.setEntity(se);
-			response = client.execute(post);
-
-			// HttpPost request = new HttpPost(serverUrl);
-			// request.setEntity(new ByteArrayEntity(
-			// postMessage.toString().getBytes("UTF8")));
-			// HttpResponse response = client.execute(request);
-
-			/* Checking response */
-			if (response != null) {
-				Log.d(TAG, EntityUtils.toString(response.getEntity()));
-			}
-
-			return (response.getStatusLine().getStatusCode() == 200);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.e(TAG, "Cannot Estabilish Connection");
-		}
-		return false;
-
+		mAppContext.unregisterReceiver(mHandleMessage);
+		mAppContext.unregisterReceiver(mHandleGCMMessageReceiver);
+		mAppContext.unregisterReceiver(mHandleSMSReceiver);
+		GCMRegistrar.onDestroy(mAppContext);
 	}
 
 	public void sendMessageToServer(final Sms msg) {
@@ -169,13 +147,13 @@ public class MainPresenter {
 		msg.setUserId(ThumbsyApp.getUser().getId());
 		final String smsData = CommonUtils.GSON.toJson(msg);
 
-		Log.d(TAG, smsData);
+		// Log.d(TAG, smsData);
 
 		mSendMessageTask = new AsyncTask<Void, Void, Void>() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				if (postJsonData(URL_POST_MESSAGE, smsData)) {
+				if (ServerUtils.postJsonData(URL_POST_MESSAGE, smsData)) {
 					Log.d(TAG, "message posted to " + URL_POST_MESSAGE);
 				}
 				return null;
@@ -190,10 +168,6 @@ public class MainPresenter {
 		mSendMessageTask.execute(null, null, null);
 	}
 
-	private static String SENT = "SMS_SENT";
-	private static String DELIVERED = "SMS_DELIVERED";
-	private static int MAX_SMS_MESSAGE_LENGTH = 160;
-
 	private void sendSMS(String phoneNumber, String msgBody) {
 
 		PendingIntent piSent = PendingIntent.getBroadcast(mView.getContext(),
@@ -202,7 +176,7 @@ public class MainPresenter {
 				mView.getContext(), 0, new Intent(DELIVERED), 0);
 
 		// ---when the SMS has been sent---
-		mContext.registerReceiver(new BroadcastReceiver() {
+		mAppContext.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context arg0, Intent arg1) {
 				switch (getResultCode()) {
@@ -236,7 +210,7 @@ public class MainPresenter {
 		}, new IntentFilter(SENT));
 
 		// ---when the SMS has been delivered---
-		mContext.registerReceiver(new BroadcastReceiver() {
+		mAppContext.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context arg0, Intent arg1) {
 				switch (getResultCode()) {
@@ -310,18 +284,17 @@ public class MainPresenter {
 	//
 	// }
 
-	public void registerDevice(final Context context) {
+	public void registerDevice() {
 
-		final String regId = GCMRegistrar.getRegistrationId(context);
-		final String userId = ThumbsyApp.getUser().getId();
+		final String regId = GCMRegistrar.getRegistrationId(mAppContext);
 
 		if (regId.equals("")) {
 			// Automatically registers application on startup.
-			GCMRegistrar.register(context, SENDER_ID);
+			GCMRegistrar.register(mAppContext, SENDER_ID);
 		} else {
 
 			// Device is already registered on GCM, check server.
-			if (GCMRegistrar.isRegisteredOnServer(context)) {
+			if (GCMRegistrar.isRegisteredOnServer(mAppContext)) {
 				// Skips registration.
 				mView.sayAlreadyRegistered();
 			} else {
@@ -334,8 +307,8 @@ public class MainPresenter {
 
 					@Override
 					protected Void doInBackground(Void... params) {
-						boolean registered = ServerUtils.register(context,
-								regId, userId);
+						boolean registered = ServerUtils.register(mAppContext,
+								regId);
 						// At this point all attempts to register with the app
 						// server failed, so we need to unregister the device
 						// from GCM - the app will try to register again when
@@ -343,7 +316,7 @@ public class MainPresenter {
 						// unregistered callback upon completion, but
 						// GCMIntentService.onUnregistered() will ignore it.
 						if (!registered) {
-							GCMRegistrar.unregister(context);
+							GCMRegistrar.unregister(mAppContext);
 						}
 						return null;
 					}
@@ -359,21 +332,8 @@ public class MainPresenter {
 		}
 	}
 
-	public void unregisterDevice(Context context) {
-		GCMRegistrar.unregister(context);
-	}
-
-	private String createConversation(Long id) {
-		SmsThread c = new SmsThread(id, ThumbsyApp.getUser().getId(),
-				"no content");
-		return CommonUtils.GSON.toJson(c);
-	}
-
-	private String createMessage(Long msgId, String msgBody, String msgAddress) {
-		Sms sms = new Sms(msgId, msgBody, msgAddress, true,
-				String.valueOf(new Date().toString()));
-		sms.setUserId(ThumbsyApp.getUser().getId());
-		return CommonUtils.GSON.toJson(sms);
+	public void unregisterDevice() {
+		GCMRegistrar.unregister(mAppContext);
 	}
 
 	private void checkNotNull(Object reference, String name) {

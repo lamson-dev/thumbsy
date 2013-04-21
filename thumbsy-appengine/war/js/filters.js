@@ -14,15 +14,25 @@
 
 'use strict';
 
-angular.module('photoHunt.filters', [])
-    .filter('profilePicture', function() {
-      return function(profilePicUrl, size) {
-        if(profilePicUrl) {
-          var clean = profilePicUrl.replace(/\?sz=(\d)*$/, ''); 
-          return clean + '?sz=' + size;
+var appFilters = angular.module('myApp.filters', []);
+
+appFilters.filter('profilePicture', function () {
+    return function (profilePicUrl, size) {
+        if (profilePicUrl) {
+            var clean = profilePicUrl.replace(/\?sz=(\d)*$/, '');
+            return clean + '?sz=' + size;
         } else {
-          return '';
+            return '';
         }
-      };
-    })
-;
+    };
+});
+
+appFilters.filter('threadDate', function () {
+    return function (dateInMilliSec) {
+        var date = moment(parseInt(dateInMilliSec));
+        if (date.diff(moment(), 'days') > 0)
+            return date.format('MMM Do, h:mm A');
+        else
+            return date.format('h:mm A');
+    };
+});

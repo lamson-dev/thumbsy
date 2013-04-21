@@ -16,9 +16,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import me.lamson.thumbsy.appengine.DatastoreGCM;
-import me.lamson.thumbsy.appengine.SmsDao;
-import me.lamson.thumbsy.appengine.SmsThreadDao;
+import me.lamson.thumbsy.appengine.dao.SmsDao;
+import me.lamson.thumbsy.appengine.dao.SmsThreadDao;
+import me.lamson.thumbsy.appengine.dao.UserDao;
 import me.lamson.thumbsy.models.Sms;
 import me.lamson.thumbsy.models.SmsThread;
 
@@ -40,7 +40,14 @@ public class SmsResource extends BaseResource {
 	UriInfo uriInfo;
 	@Context
 	Request request;
-
+	
+	
+	
+	/**
+	 * get a single message
+	 * @param messageId
+	 * @return
+	 */
 	@GET
 	@Path("{messageId : \\d+}")
 	// support digits only
@@ -71,10 +78,16 @@ public class SmsResource extends BaseResource {
 	}
 
 	@GET
-	@Path("conversation/{userId}/{address}")
+	@Path("conversation/{address}/{userId}")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<Sms> getSmssByAddress(@PathParam("userId") String userId,
 			@PathParam("address") String address) {
+		if (address.equals("current")) {
+			address = UserDao.getCurrentConversationAddress(userId);
+			logger.info("current address is: " + address);
+		}
+		// update current conversation
+		UserDao.updateCurrentConversationAddress(userId, address);
 		return SmsDao.getSmsByThreadKey(userId, address);
 	}
 
@@ -95,12 +108,14 @@ public class SmsResource extends BaseResource {
 		try {
 			Sms msg = new Gson().fromJson(jsonData, Sms.class);
 
+			// TODO: make sure uncomment this later
+
 			// authenticate by checking userId register
-			if (DatastoreGCM.getRegIdByUserId(msg.getUserId()) == null) {
-				jsonResponse = "you haven't register yet!";
-				return Response.status(Response.Status.NOT_ACCEPTABLE)
-						.entity(jsonResponse).build();
-			}
+			// if (DatastoreGCM.getRegIdByUserId(msg.getUserId()) == null) {
+			// jsonResponse = "you haven't register yet!";
+			// return Response.status(Response.Status.NOT_ACCEPTABLE)
+			// .entity(jsonResponse).build();
+			// }
 
 			// check if conversation is already on server
 			List<SmsThread> threads = SmsThreadDao.getThreadsByUserId(msg
@@ -116,9 +131,11 @@ public class SmsResource extends BaseResource {
 					}
 				}
 
-			if (!isThreadOnServer)
-				SmsThreadDao.createAndStoreThread(null, msg.getUserId(),
+			if (!isThreadOnServer) {
+				String threadName = msg.getAddress() + msg.getUserId();
+				SmsThreadDao.createAndStoreThread(threadName, msg.getUserId(),
 						msg.getAddress());
+			}
 
 			SmsDao.storeSms(msg);
 			return Response.status(Response.Status.CREATED).build();

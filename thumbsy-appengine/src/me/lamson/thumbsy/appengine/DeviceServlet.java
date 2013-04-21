@@ -21,6 +21,9 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import me.lamson.thumbsy.appengine.dao.DatastoreGCM;
+
+
 /**
  * Servlet that adds display number of devices and button to send a message.
  * <p>

@@ -1,3 +1,4 @@
+package me.lamson.thumbsy.appengine.dao;
 //package me.lamson.thumbsy.appengine;
 //
 //import java.util.List;

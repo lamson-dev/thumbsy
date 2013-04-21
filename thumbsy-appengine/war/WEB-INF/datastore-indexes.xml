@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<datastore-indexes autoGenerate="true">
+	<datastore-index kind="SmsThread" ancestor="false"
+		source="manual">
+		<property name="userId" direction="asc" />
+		<property name="date" direction="desc" />
+	</datastore-index>
+	
+	<datastore-index kind="Sms" ancestor="false"
+		source="manual">
+		<property name="threadKey" direction="asc" />
+		<property name="date" direction="desc" />
+	</datastore-index>
+	
+</datastore-indexes>

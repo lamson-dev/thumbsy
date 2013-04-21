@@ -167,5 +167,4 @@ $(document).ready(function () {
             'Find and replace YOUR_CLIENT_ID with your client ID.'
         );
     }
-    $("#message-box").animate({ scrollTop: $('#message-box')[0].scrollHeight}, 1000);
 });
